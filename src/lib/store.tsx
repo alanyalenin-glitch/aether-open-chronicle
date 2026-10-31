@@ -1,7 +1,9 @@
+import mountain from "@/assets/post-mountain.jpg";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
 export type User = { id: string; name: string; handle: string; bio: string; hue: number };
-export type Post = { id: string; userId: string; text: string; image?: string | undefined; createdAt: number; likes: string[] };
+export type Post = { id: string; userId: string; text: string; image?: string | undefined; createdAt: number; likes: string[]; comments: Comment[] };
+export type Comment = { id: string; userId: string; text: string; at: number };
 export type Message = { from: string; text: string; at: number };
 export type Conversation = { id: string; withId: string; messages: Message[] };
 
@@ -13,9 +15,9 @@ const people: User[] = [
 ];
 
 const seedPosts: Post[] = [
-  { id: "p1", userId: "u1", text: "Sin algoritmos, sin ruido. Solo lo que publican las personas que sigues, en orden. Así se siente Aether.", createdAt: now - 1000 * 60 * 12, likes: ["u2"] },
-  { id: "p2", userId: "u2", text: "Amanecer en el Huascarán esta mañana. Vale cada paso.", createdAt: now - 1000 * 60 * 90, likes: [] },
-  { id: "p3", userId: "u3", text: "Pensamiento del día: menos notificaciones, más conversaciones.", createdAt: now - 1000 * 60 * 60 * 5, likes: ["u1", "u2"] },
+  { id: "p1", userId: "u1", text: "Sin algoritmos, sin ruido. Solo lo que publican las personas que sigues, en orden. Así se siente Aether.", createdAt: now - 1000 * 60 * 12, likes: ["u2"], comments: [{ id: "k1", userId: "u3", text: "¡Por fin! 🙌", at: now - 600000 }] },
+  { id: "p2", userId: "u2", text: "Amanecer en el Huascarán esta mañana. Vale cada paso.", image: mountain, createdAt: now - 1000 * 60 * 90, likes: ["u1"], comments: [] },
+  { id: "p3", userId: "u3", text: "Pensamiento del día: menos notificaciones, más conversaciones.", createdAt: now - 1000 * 60 * 60 * 5, likes: ["u1", "u2"], comments: [] },
 ];
 
 const seedConvos: Conversation[] = [
@@ -35,11 +37,12 @@ type Ctx = State & {
   updateMe: (p: Partial<User>) => void;
   addPost: (text: string, image?: string) => void;
   toggleLike: (id: string) => void;
+  addComment: (id: string, text: string) => void;
   sendMessage: (convoId: string, text: string) => void;
 };
 
 const StoreCtx = createContext<Ctx | null>(null);
-const KEY = "aether-state-v1";
+const KEY = "aether-state-v2";
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<State>({ me: null, posts: seedPosts, convos: seedConvos });
@@ -72,13 +75,20 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     addPost: (text, image) =>
       setState((s) => ({
         ...s,
-        posts: [{ id: crypto.randomUUID(), userId: "me", text, image, createdAt: Date.now(), likes: [] }, ...s.posts],
+        posts: [{ id: crypto.randomUUID(), userId: "me", text, image, createdAt: Date.now(), likes: [], comments: [] }, ...s.posts],
       })),
     toggleLike: (id) =>
       setState((s) => ({
         ...s,
         posts: s.posts.map((p) =>
           p.id !== id ? p : { ...p, likes: p.likes.includes("me") ? p.likes.filter((l) => l !== "me") : [...p.likes, "me"] },
+        ),
+      })),
+    addComment: (id, text) =>
+      setState((s) => ({
+        ...s,
+        posts: s.posts.map((p) =>
+          p.id !== id ? p : { ...p, comments: [...p.comments, { id: crypto.randomUUID(), userId: "me", text, at: Date.now() }] },
         ),
       })),
     sendMessage: (convoId, text) => {

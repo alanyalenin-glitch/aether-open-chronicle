@@ -21,7 +21,7 @@ export function Avatar({ user, size = 40 }: { user?: User | undefined; size?: nu
 }
 
 const nav = [
-  { to: "/feed", label: "Muro", icon: Home },
+  { to: "/feed", label: "Inicio", icon: Home },
   { to: "/messages", label: "Mensajes", icon: MessageCircle },
   { to: "/profile", label: "Perfil", icon: UserIcon },
 ] as const;
@@ -38,46 +38,35 @@ export function AppShell({ title, children }: { title: string; children: ReactNo
 
   return (
     <div className="aurora min-h-screen">
-      <div className="mx-auto flex max-w-5xl">
-        <aside className="sticky top-0 hidden h-screen w-60 flex-col gap-2 border-r p-6 md:flex">
-          <Link to="/feed" className="mb-6 font-display text-2xl font-bold text-aether">Aether</Link>
-          {nav.map(({ to, label, icon: Icon }) => (
-            <Link
-              key={to}
-              to={to}
-              className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-muted-foreground transition-all hover:bg-secondary hover:text-foreground"
-              activeProps={{ className: "bg-secondary !text-foreground" }}
+      <header className="glass fixed inset-x-0 top-0 z-30 border-b">
+        <div className="mx-auto flex h-16 max-w-2xl items-center justify-between px-4">
+          <Link to="/feed" className="font-display text-xl font-bold text-aether">Aether</Link>
+          <nav className="flex items-center gap-1">
+            {nav.map(({ to, label, icon: Icon }) => (
+              <Link
+                key={to}
+                to={to}
+                aria-label={label}
+                className="flex items-center gap-2 rounded-full px-3 py-2 text-sm text-muted-foreground transition-all hover:bg-secondary hover:text-foreground"
+                activeProps={{ className: "bg-secondary !text-primary" }}
+              >
+                <Icon size={19} /> <span className="hidden sm:inline">{label}</span>
+              </Link>
+            ))}
+            <button
+              onClick={() => { logout(); navigate({ to: "/" }); }}
+              aria-label="Salir"
+              className="rounded-full p-2 text-muted-foreground transition-colors hover:text-destructive"
             >
-              <Icon size={20} /> {label}
-            </Link>
-          ))}
-          <button
-            onClick={() => { logout(); navigate({ to: "/" }); }}
-            className="mt-auto flex items-center gap-3 rounded-xl px-3 py-2.5 text-muted-foreground transition-colors hover:text-destructive"
-          >
-            <LogOut size={20} /> Salir
-          </button>
-        </aside>
-        <main className="min-h-screen flex-1 pb-24 md:pb-0">
-          <header className="glass sticky top-0 z-10 flex items-center justify-between border-b px-5 py-4">
-            <h1 className="text-lg font-semibold">{title}</h1>
-            <span className="font-display font-bold text-aether md:hidden">Aether</span>
-          </header>
-          <div className="mx-auto max-w-xl">{children}</div>
-        </main>
-      </div>
-      <nav className="glass fixed inset-x-0 bottom-0 z-20 flex justify-around border-t py-3 md:hidden">
-        {nav.map(({ to, label, icon: Icon }) => (
-          <Link
-            key={to}
-            to={to}
-            className="flex flex-col items-center gap-1 text-xs text-muted-foreground transition-colors"
-            activeProps={{ className: "!text-primary" }}
-          >
-            <Icon size={22} /> {label}
-          </Link>
-        ))}
-      </nav>
+              <LogOut size={18} />
+            </button>
+          </nav>
+        </div>
+      </header>
+      <main className="mx-auto max-w-2xl px-4 pb-10 pt-20">
+        <h1 className="sr-only">{title}</h1>
+        {children}
+      </main>
     </div>
   );
 }
