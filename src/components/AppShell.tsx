@@ -3,7 +3,7 @@ import { useEffect, type ReactNode } from "react";
 import { Home, MessageCircle, User as UserIcon, LogOut } from "lucide-react";
 import { useStore, type User } from "@/lib/store";
 
-export function Avatar({ user, size = 40 }: { user?: User; size?: number }) {
+export function Avatar({ user, size = 40 }: { user?: User | undefined; size?: number }) {
   if (!user) return null;
   return (
     <div

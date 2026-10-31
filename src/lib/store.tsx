@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
 export type User = { id: string; name: string; handle: string; bio: string; hue: number };
-export type Post = { id: string; userId: string; text: string; image?: string; createdAt: number; likes: string[] };
+export type Post = { id: string; userId: string; text: string; image?: string | undefined; createdAt: number; likes: string[] };
 export type Message = { from: string; text: string; at: number };
 export type Conversation = { id: string; withId: string; messages: Message[] };
 
@@ -89,7 +89,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         }));
       add({ from: "me", text, at: Date.now() });
       const c = state.convos.find((c) => c.id === convoId);
-      if (c) setTimeout(() => add({ from: c.withId, text: replies[Math.floor(Math.random() * replies.length)], at: Date.now() }), 1200);
+      const r = replies[Math.floor(Math.random() * replies.length)] ?? "👍";
+      if (c) setTimeout(() => add({ from: c.withId, text: r, at: Date.now() }), 1200);
     },
   };
 
