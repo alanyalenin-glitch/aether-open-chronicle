@@ -27,7 +27,7 @@ function Profile() {
 
   return (
     <AppShell title="Perfil">
-      <div className="h-32 bg-aether opacity-70" style={{ filter: `hue-rotate(${me.hue - 185}deg)` }} />
+      <div className="h-32 rounded-2xl bg-aether opacity-70" style={{ filter: `hue-rotate(${me.hue - 185}deg)` }} />
       <div className="px-5">
         <div className="-mt-10 flex items-end justify-between">
           <div className="rounded-full border-4 border-background">
