@@ -16,6 +16,6 @@ export function zodiacFor(iso: string): string {
   const [, m, d] = iso.split("-").map(Number);
   if (!m || !d) return "";
   const cut = [20, 19, 21, 20, 21, 21, 23, 23, 23, 23, 22, 22]; // first day of the sign starting in month m
-  const idx = d >= cut[m - 1]! ? (m + 8) % 12 : (m + 7) % 12;
+  const idx = d >= cut[m - 1]! ? (m + 9) % 12 : (m + 8) % 12;
   return ZODIAC[idx]!;
 }
