@@ -7,10 +7,10 @@ import { timeAgo, useStore } from "@/lib/store";
 export const Route = createFileRoute("/messages")({
   head: () => ({
     meta: [
-      { title: "Mensajes — Aether" },
-      { name: "description", content: "Mensajes directos en Aether." },
-      { property: "og:title", content: "Mensajes — Aether" },
-      { property: "og:description", content: "Conversaciones privadas en Aether." },
+      { title: "Mensajes — Luna" },
+      { name: "description", content: "Mensajes directos en Luna." },
+      { property: "og:title", content: "Mensajes — Luna" },
+      { property: "og:description", content: "Conversaciones privadas en Luna." },
     ],
   }),
   component: Messages,
@@ -38,7 +38,7 @@ function Messages() {
           {open.messages.map((m, i) => (
             <div
               key={i}
-              className={`fade-up max-w-[78%] rounded-2xl px-4 py-2.5 ${m.from === "me" ? "bg-aether self-end rounded-br-sm text-primary-foreground" : "self-start rounded-bl-sm bg-secondary"}`}
+              className={`fade-up max-w-[78%] rounded-2xl px-4 py-2.5 ${m.from === "me" ? "bg-luna self-end rounded-br-sm text-primary-foreground" : "self-start rounded-bl-sm bg-secondary"}`}
             >
               {m.text}
             </div>
@@ -50,7 +50,7 @@ function Messages() {
           className="glass sticky bottom-0 flex gap-2 rounded-2xl border p-3"
         >
           <input value={text} onChange={(e) => setText(e.target.value)} placeholder="Escribe un mensaje…" className="flex-1 rounded-full border bg-input px-4 py-2.5 outline-none focus:ring-2 focus:ring-ring" />
-          <button className="bg-aether rounded-full p-3 text-primary-foreground transition active:scale-95" aria-label="Enviar"><Send size={18} /></button>
+          <button className="bg-luna rounded-full p-3 text-primary-foreground transition active:scale-95" aria-label="Enviar"><Send size={18} /></button>
         </form>
       </AppShell>
     );

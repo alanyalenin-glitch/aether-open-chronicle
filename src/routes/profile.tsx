@@ -6,10 +6,10 @@ import { timeAgo, useStore } from "@/lib/store";
 export const Route = createFileRoute("/profile")({
   head: () => ({
     meta: [
-      { title: "Perfil — Aether" },
-      { name: "description", content: "Personaliza tu perfil en Aether." },
-      { property: "og:title", content: "Perfil — Aether" },
-      { property: "og:description", content: "Tu perfil personalizado en Aether." },
+      { title: "Perfil — Luna" },
+      { name: "description", content: "Personaliza tu perfil en Luna." },
+      { property: "og:title", content: "Perfil — Luna" },
+      { property: "og:description", content: "Tu perfil personalizado en Luna." },
     ],
   }),
   component: Profile,
@@ -27,7 +27,7 @@ function Profile() {
 
   return (
     <AppShell title="Perfil">
-      <div className="h-32 rounded-2xl bg-aether opacity-70" style={{ filter: `hue-rotate(${me.hue - 185}deg)` }} />
+      <div className="h-32 rounded-2xl bg-luna opacity-70" style={{ filter: `hue-rotate(${me.hue - 185}deg)` }} />
       <div className="px-5">
         <div className="-mt-10 flex items-end justify-between">
           <div className="rounded-full border-4 border-background">
@@ -57,7 +57,7 @@ function Profile() {
             </div>
             <button
               onClick={() => { updateMe({ name: name || me.name, bio }); setEditing(false); }}
-              className="bg-aether rounded-full px-5 py-2 text-sm font-semibold text-primary-foreground"
+              className="bg-luna rounded-full px-5 py-2 text-sm font-semibold text-primary-foreground"
             >
               Guardar
             </button>

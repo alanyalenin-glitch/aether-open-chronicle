@@ -40,7 +40,7 @@ export function AppShell({ title, children }: { title: string; children: ReactNo
     <div className="aurora min-h-screen">
       <header className="glass fixed inset-x-0 top-0 z-30 border-b">
         <div className="mx-auto flex h-16 max-w-2xl items-center justify-between px-4">
-          <Link to="/feed" className="font-display text-xl font-bold text-aether">Aether</Link>
+          <Link to="/feed" className="font-display text-xl font-bold text-luna">Luna</Link>
           <nav className="flex items-center gap-1">
             {nav.map(({ to, label, icon: Icon }) => (
               <Link
