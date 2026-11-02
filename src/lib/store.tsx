@@ -43,6 +43,7 @@ type Ctx = State & {
 
 const StoreCtx = createContext<Ctx | null>(null);
 const KEY = "luna-state-v2";
+const LEGACY_KEY = "aether-state-v2";
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<State>({ me: null, posts: seedPosts, convos: seedConvos });
@@ -50,7 +51,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     try {
-      const raw = localStorage.getItem(KEY);
+      const raw = localStorage.getItem(KEY) ?? localStorage.getItem(LEGACY_KEY);
       if (raw) setState(JSON.parse(raw));
     } catch {}
     setLoaded(true);
