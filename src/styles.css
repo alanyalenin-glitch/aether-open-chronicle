@@ -56,7 +56,7 @@
   --input: oklch(1 0 0 / 10%);
   --ring: oklch(0.86 0.12 185 / 60%);
   --glow: oklch(0.72 0.14 240);
-  --gradient-aether: linear-gradient(135deg, var(--primary), var(--glow));
+  --gradient-luna: linear-gradient(135deg, var(--primary), var(--glow));
 }
 
 @layer base {
@@ -70,9 +70,9 @@
   h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.02em; }
 }
 
-@utility bg-aether { background-image: var(--gradient-aether); }
-@utility text-aether {
-  background-image: var(--gradient-aether);
+@utility bg-luna { background-image: var(--gradient-luna); }
+@utility text-luna {
+  background-image: var(--gradient-luna);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;

@@ -15,13 +15,13 @@ const people: User[] = [
 ];
 
 const seedPosts: Post[] = [
-  { id: "p1", userId: "u1", text: "Sin algoritmos, sin ruido. Solo lo que publican las personas que sigues, en orden. Así se siente Aether.", createdAt: now - 1000 * 60 * 12, likes: ["u2"], comments: [{ id: "k1", userId: "u3", text: "¡Por fin! 🙌", at: now - 600000 }] },
+  { id: "p1", userId: "u1", text: "Sin algoritmos, sin ruido. Solo lo que publican las personas que sigues, en orden. Así se siente Luna.", createdAt: now - 1000 * 60 * 12, likes: ["u2"], comments: [{ id: "k1", userId: "u3", text: "¡Por fin! 🙌", at: now - 600000 }] },
   { id: "p2", userId: "u2", text: "Amanecer en el Huascarán esta mañana. Vale cada paso.", image: mountain, createdAt: now - 1000 * 60 * 90, likes: ["u1"], comments: [] },
   { id: "p3", userId: "u3", text: "Pensamiento del día: menos notificaciones, más conversaciones.", createdAt: now - 1000 * 60 * 60 * 5, likes: ["u1", "u2"], comments: [] },
 ];
 
 const seedConvos: Conversation[] = [
-  { id: "c1", withId: "u1", messages: [{ from: "u1", text: "¡Hola! ¿Bienvenido a Aether 👋", at: now - 600000 }] },
+  { id: "c1", withId: "u1", messages: [{ from: "u1", text: "¡Hola! ¿Bienvenido a Luna 👋", at: now - 600000 }] },
   { id: "c2", withId: "u2", messages: [{ from: "u2", text: "¿Viste mi última foto?", at: now - 3600000 }] },
   { id: "c3", withId: "u3", messages: [] },
 ];
@@ -42,7 +42,7 @@ type Ctx = State & {
 };
 
 const StoreCtx = createContext<Ctx | null>(null);
-const KEY = "aether-state-v2";
+const KEY = "luna-state-v2";
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<State>({ me: null, posts: seedPosts, convos: seedConvos });
@@ -68,7 +68,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     login: (name) =>
       setState((s) => ({
         ...s,
-        me: { id: "me", name, handle: name.toLowerCase().replace(/[^a-z0-9]/g, "") || "yo", bio: "Nuevo en Aether.", hue: 200 },
+        me: { id: "me", name, handle: name.toLowerCase().replace(/[^a-z0-9]/g, "") || "yo", bio: "Nuevo en Luna.", hue: 200 },
       })),
     logout: () => setState((s) => ({ ...s, me: null })),
     updateMe: (p) => setState((s) => (s.me ? { ...s, me: { ...s.me, ...p } } : s)),

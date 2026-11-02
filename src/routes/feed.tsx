@@ -7,9 +7,9 @@ import { timeAgo, useStore, type Post } from "@/lib/store";
 export const Route = createFileRoute("/feed")({
   head: () => ({
     meta: [
-      { title: "Inicio — Aether" },
-      { name: "description", content: "Tu muro cronológico en Aether, sin algoritmos ocultos." },
-      { property: "og:title", content: "Inicio — Aether" },
+      { title: "Inicio — Luna" },
+      { name: "description", content: "Tu muro cronológico en Luna, sin algoritmos ocultos." },
+      { property: "og:title", content: "Inicio — Luna" },
       { property: "og:description", content: "Publicaciones en orden cronológico." },
     ],
   }),
@@ -67,7 +67,7 @@ function Feed() {
               <button
                 onClick={publish}
                 disabled={!text.trim() && !image}
-                className="bg-aether rounded-full px-5 py-2 text-sm font-semibold text-primary-foreground transition hover:opacity-90 active:scale-95 disabled:opacity-40"
+                className="bg-luna rounded-full px-5 py-2 text-sm font-semibold text-primary-foreground transition hover:opacity-90 active:scale-95 disabled:opacity-40"
               >
                 Publicar
               </button>
@@ -94,7 +94,7 @@ function PostCard({ post: p }: { post: Post }) {
   const share = async () => {
     const url = `${window.location.origin}/feed#${p.id}`;
     try {
-      if (navigator.share) await navigator.share({ title: "Aether", text: p.text, url });
+      if (navigator.share) await navigator.share({ title: "Luna", text: p.text, url });
       else await navigator.clipboard.writeText(url);
       setShared(true);
       setTimeout(() => setShared(false), 1800);
@@ -144,7 +144,7 @@ function PostCard({ post: p }: { post: Post }) {
             className="flex gap-2"
           >
             <input value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Escribe un comentario…" className="flex-1 rounded-full border bg-input px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-ring" />
-            <button className="bg-aether rounded-full px-4 text-sm font-semibold text-primary-foreground disabled:opacity-40" disabled={!comment.trim()}>Enviar</button>
+            <button className="bg-luna rounded-full px-4 text-sm font-semibold text-primary-foreground disabled:opacity-40" disabled={!comment.trim()}>Enviar</button>
           </form>
         </div>
       )}

@@ -5,9 +5,9 @@ import { useStore } from "@/lib/store";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Aether — Una red social sin algoritmos" },
-      { name: "description", content: "Aether: red social minimalista con muro cronológico, perfiles y mensajes." },
-      { property: "og:title", content: "Aether — Una red social sin algoritmos" },
+      { title: "Luna — Una red social sin algoritmos" },
+      { name: "description", content: "Luna: red social minimalista con muro cronológico, perfiles y mensajes." },
+      { property: "og:title", content: "Luna — Una red social sin algoritmos" },
       { property: "og:description", content: "Muro cronológico, perfiles personalizados y mensajes directos." },
     ],
   }),
@@ -33,7 +33,7 @@ function Welcome() {
   return (
     <div className="aurora flex min-h-screen items-center justify-center px-6">
       <div className="fade-up w-full max-w-sm">
-        <h1 className="text-center text-6xl font-bold text-aether">Aether</h1>
+        <h1 className="text-center text-6xl font-bold text-luna">Luna</h1>
         <p className="mt-3 text-center text-muted-foreground">
           Personas, no algoritmos. Tu muro, en orden cronológico.
         </p>
@@ -58,7 +58,7 @@ function Welcome() {
           />
           <button
             disabled={loading}
-            className="bg-aether w-full rounded-xl py-3 font-semibold text-primary-foreground transition hover:opacity-90 active:scale-[0.98] disabled:opacity-60"
+            className="bg-luna w-full rounded-xl py-3 font-semibold text-primary-foreground transition hover:opacity-90 active:scale-[0.98] disabled:opacity-60"
           >
             {loading ? "Entrando…" : "Entrar"}
           </button>
