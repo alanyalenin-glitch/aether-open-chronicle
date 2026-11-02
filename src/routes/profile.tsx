@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { Lock } from "lucide-react";
 import { AppShell, Avatar } from "@/components/AppShell";
 import { timeAgo, useStore } from "@/lib/store";
 
@@ -70,6 +71,25 @@ function Profile() {
             <p className="mt-3 text-sm text-muted-foreground"><span className="font-semibold text-foreground">{mine.length}</span> publicaciones</p>
           </div>
         )}
+        <section className="mt-6 rounded-2xl border bg-secondary/30 p-4">
+          <div className="flex items-center gap-2">
+            <Lock className="h-4 w-4 text-muted-foreground" />
+            <h3 className="text-sm font-semibold">Configuración privada</h3>
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground">Solo tú ves estos datos. Los demás solo ven «{me.name}».</p>
+          {me.private ? (
+            <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
+              <dt className="text-muted-foreground">Nombre completo</dt><dd>{me.private.fullName}</dd>
+              <dt className="text-muted-foreground">Correo</dt><dd className="break-all">{me.private.email}</dd>
+              <dt className="text-muted-foreground">Nacimiento</dt><dd>{new Date(me.private.birthDate + "T00:00").toLocaleDateString("es")}</dd>
+              <dt className="text-muted-foreground">Signo</dt><dd>{me.private.zodiac}</dd>
+              <dt className="text-muted-foreground">Verificación facial</dt>
+              <dd className={me.private.faceVerified ? "text-primary" : "text-muted-foreground"}>{me.private.faceVerified ? "Verificado ✓" : "Pendiente"}</dd>
+            </dl>
+          ) : (
+            <p className="mt-3 text-sm text-muted-foreground">Entraste sin registrarte, así que no hay datos privados guardados.</p>
+          )}
+        </section>
       </div>
       <div className="mt-6 border-t">
         {mine.length === 0 && <p className="p-8 text-center text-muted-foreground">Aún no has publicado nada.</p>}
