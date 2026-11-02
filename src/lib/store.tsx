@@ -1,7 +1,9 @@
 import mountain from "@/assets/post-mountain.jpg";
+import { publicName } from "@/lib/identity";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
-export type User = { id: string; name: string; handle: string; bio: string; hue: number };
+export type PrivateInfo = { fullName: string; email: string; birthDate: string; zodiac: string; faceVerified: boolean; verifiedAt?: number | undefined };
+export type User = { id: string; name: string; handle: string; bio: string; hue: number; private?: PrivateInfo | undefined };
 export type Post = { id: string; userId: string; text: string; image?: string | undefined; createdAt: number; likes: string[]; comments: Comment[] };
 export type Comment = { id: string; userId: string; text: string; at: number };
 export type Message = { from: string; text: string; at: number };
@@ -33,6 +35,7 @@ type Ctx = State & {
   people: User[];
   getUser: (id: string) => User | undefined;
   login: (name: string) => void;
+  register: (info: PrivateInfo) => void;
   logout: () => void;
   updateMe: (p: Partial<User>) => void;
   addPost: (text: string, image?: string) => void;
@@ -71,6 +74,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         ...s,
         me: { id: "me", name, handle: name.toLowerCase().replace(/[^a-z0-9]/g, "") || "yo", bio: "Nuevo en Luna.", hue: 200 },
       })),
+    register: (info) =>
+      setState((s) => {
+        const name = publicName(info.fullName);
+        return { ...s, me: { id: "me", name, handle: name.toLowerCase().normalize("NFD").replace(/[^a-z0-9]/g, "") || "yo", bio: "Nuevo en Luna.", hue: 200, private: info } };
+      }),
     logout: () => setState((s) => ({ ...s, me: null })),
     updateMe: (p) => setState((s) => (s.me ? { ...s, me: { ...s.me, ...p } } : s)),
     addPost: (text, image) =>
