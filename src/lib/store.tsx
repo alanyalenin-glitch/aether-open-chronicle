@@ -6,7 +6,8 @@ export type PrivateInfo = { fullName: string; email: string; birthDate: string; 
 export type User = { id: string; name: string; handle: string; bio: string; hue: number; private?: PrivateInfo | undefined };
 export type Post = { id: string; userId: string; text: string; image?: string | undefined; createdAt: number; likes: string[]; comments: Comment[] };
 export type Comment = { id: string; userId: string; text: string; at: number };
-export type Message = { from: string; text: string; at: number };
+export type Attachment = { kind: "image" | "audio" | "file" | "voice"; name: string; url?: string | undefined; size?: number | undefined; duration?: number | undefined };
+export type Message = { from: string; text: string; at: number; attachment?: Attachment | undefined };
 export type Conversation = { id: string; withId: string; messages: Message[] };
 
 const now = Date.now();
@@ -41,7 +42,7 @@ type Ctx = State & {
   addPost: (text: string, image?: string) => void;
   toggleLike: (id: string) => void;
   addComment: (id: string, text: string) => void;
-  sendMessage: (convoId: string, text: string) => void;
+  sendMessage: (convoId: string, text: string, attachment?: Attachment) => void;
 };
 
 const StoreCtx = createContext<Ctx | null>(null);
@@ -100,13 +101,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           p.id !== id ? p : { ...p, comments: [...p.comments, { id: crypto.randomUUID(), userId: "me", text, at: Date.now() }] },
         ),
       })),
-    sendMessage: (convoId, text) => {
+    sendMessage: (convoId, text, attachment) => {
       const add = (m: Message) =>
         setState((s) => ({
           ...s,
           convos: s.convos.map((c) => (c.id === convoId ? { ...c, messages: [...c.messages, m] } : c)),
         }));
-      add({ from: "me", text, at: Date.now() });
+      add({ from: "me", text, at: Date.now(), attachment });
       const c = state.convos.find((c) => c.id === convoId);
       const r = replies[Math.floor(Math.random() * replies.length)] ?? "👍";
       if (c) setTimeout(() => add({ from: c.withId, text: r, at: Date.now() }), 1200);
