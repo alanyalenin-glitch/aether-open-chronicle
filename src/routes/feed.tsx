@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useRef, useState } from "react";
-import { Heart, ImagePlus, MessageCircle, Share2, Check, X } from "lucide-react";
+import { ImagePlus, MessageCircle, Share2, Check, X } from "lucide-react";
 import { AppShell, Avatar } from "@/components/AppShell";
-import { timeAgo, useStore, type Post } from "@/lib/store";
+import { REACTIONS, reactionCount, timeAgo, useStore, type Post } from "@/lib/store";
 
 export const Route = createFileRoute("/feed")({
   head: () => ({
@@ -84,12 +84,11 @@ function Feed() {
 }
 
 function PostCard({ post: p }: { post: Post }) {
-  const { getUser, toggleLike, addComment } = useStore();
+  const { getUser, react, addComment } = useStore();
   const [open, setOpen] = useState(false);
   const [comment, setComment] = useState("");
   const [shared, setShared] = useState(false);
   const u = getUser(p.userId);
-  const liked = p.likes.includes("me");
 
   const share = async () => {
     const url = `${window.location.origin}/feed#${p.id}`;
@@ -102,6 +101,7 @@ function PostCard({ post: p }: { post: Post }) {
   };
 
   const btn = "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm transition hover:bg-secondary";
+  const pill = "flex items-center gap-1 rounded-full border border-transparent px-2 py-1 text-sm transition hover:bg-secondary active:scale-90";
 
   return (
     <article className={`${card} fade-up overflow-hidden hover:bg-card`}>
@@ -114,10 +114,25 @@ function PostCard({ post: p }: { post: Post }) {
       </div>
       {p.text && <p className="whitespace-pre-wrap px-4 pt-3 leading-relaxed">{p.text}</p>}
       {p.image && <img src={p.image} alt="" loading="lazy" className="mt-3 max-h-[28rem] w-full object-cover" />}
-      <div className="flex items-center gap-1 border-t px-2 py-1.5 mt-3">
-        <button onClick={() => toggleLike(p.id)} className={`${btn} ${liked ? "text-destructive" : "text-muted-foreground hover:text-destructive"}`}>
-          <Heart size={18} className={`transition-transform ${liked ? "scale-110 fill-current" : ""}`} /> {p.likes.length}
-        </button>
+      <div className="mt-3 flex flex-wrap items-center gap-1 border-t px-2 py-1.5">
+        <div className="flex items-center gap-0.5" role="group" aria-label="Reacciones">
+          {REACTIONS.map((e) => {
+            const n = reactionCount(p, e);
+            const mine = p.reactions.some((r) => r.emoji === e && r.userId === "me");
+            return (
+              <button
+                key={e}
+                onClick={() => react(p.id, e)}
+                aria-pressed={mine}
+                aria-label={`Reaccionar con ${e}`}
+                className={`${pill} ${mine ? "border-primary/40 bg-secondary" : ""}`}
+              >
+                <span className={`text-base leading-none transition-transform ${mine ? "scale-110" : ""}`}>{e}</span>
+                <span className={`text-xs tabular-nums ${mine ? "text-foreground" : "text-muted-foreground"}`}>{n}</span>
+              </button>
+            );
+          })}
+        </div>
         <button onClick={() => setOpen(!open)} className={`${btn} ${open ? "text-primary" : "text-muted-foreground hover:text-primary"}`}>
           <MessageCircle size={18} /> {p.comments.length}
         </button>
