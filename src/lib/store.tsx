@@ -4,11 +4,42 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 
 export type PrivateInfo = { fullName: string; email: string; birthDate: string; zodiac: string; faceVerified: boolean; verifiedAt?: number | undefined };
 export type User = { id: string; name: string; handle: string; bio: string; hue: number; private?: PrivateInfo | undefined };
-export type Post = { id: string; userId: string; text: string; image?: string | undefined; createdAt: number; likes: string[]; comments: Comment[] };
+export type ReactionEmoji = "😆" | "😍" | "😭" | "👍";
+export const REACTIONS: ReactionEmoji[] = ["😆", "😍", "😭", "👍"];
+export type Reaction = { emoji: ReactionEmoji; userId: string };
+export type Post = { id: string; userId: string; text: string; image?: string | undefined; createdAt: number; reactions: Reaction[]; comments: Comment[] };
 export type Comment = { id: string; userId: string; text: string; at: number };
 export type Attachment = { kind: "image" | "audio" | "file" | "voice"; name: string; url?: string | undefined; size?: number | undefined; duration?: number | undefined };
 export type Message = { from: string; text: string; at: number; attachment?: Attachment | undefined };
 export type Conversation = { id: string; withId: string; messages: Message[] };
+
+/** Suma, quita o mueve la reacción de una persona sobre una publicación. */
+export function reactTo(post: Post, userId: string, emoji: ReactionEmoji): Post {
+  const mine = post.reactions.find((r) => r.userId === userId);
+  const others = post.reactions.filter((r) => r.userId !== userId);
+  if (mine?.emoji === emoji) return { ...post, reactions: others };
+  return { ...post, reactions: [...others, { emoji, userId }] };
+}
+
+export function reactionCount(post: Post, emoji: ReactionEmoji) {
+  return post.reactions.filter((r) => r.emoji === emoji).length;
+}
+
+/** Publicaciones guardadas en versiones anteriores: los "me gusta" pasan a ser 👍. */
+export function normalizePost(p: Partial<Post> & { likes?: string[] }): Post {
+  const reactions: Reaction[] = Array.isArray(p.reactions)
+    ? p.reactions
+    : (p.likes ?? []).map((userId) => ({ emoji: "👍" as ReactionEmoji, userId }));
+  return {
+    id: p.id ?? crypto.randomUUID(),
+    userId: p.userId ?? "me",
+    text: p.text ?? "",
+    image: p.image,
+    createdAt: p.createdAt ?? Date.now(),
+    reactions,
+    comments: Array.isArray(p.comments) ? p.comments : [],
+  };
+}
 
 const now = Date.now();
 const people: User[] = [
@@ -18,9 +49,31 @@ const people: User[] = [
 ];
 
 const seedPosts: Post[] = [
-  { id: "p1", userId: "u1", text: "Sin algoritmos, sin ruido. Solo lo que publican las personas que sigues, en orden. Así se siente Luna.", createdAt: now - 1000 * 60 * 12, likes: ["u2"], comments: [{ id: "k1", userId: "u3", text: "¡Por fin! 🙌", at: now - 600000 }] },
-  { id: "p2", userId: "u2", text: "Amanecer en el Huascarán esta mañana. Vale cada paso.", image: mountain, createdAt: now - 1000 * 60 * 90, likes: ["u1"], comments: [] },
-  { id: "p3", userId: "u3", text: "Pensamiento del día: menos notificaciones, más conversaciones.", createdAt: now - 1000 * 60 * 60 * 5, likes: ["u1", "u2"], comments: [] },
+  {
+    id: "p1",
+    userId: "u1",
+    text: "Sin algoritmos, sin ruido. Solo lo que publican las personas que sigues, en orden. Así se siente Luna.",
+    createdAt: now - 1000 * 60 * 12,
+    reactions: [{ emoji: "😍", userId: "u2" }, { emoji: "👍", userId: "u3" }],
+    comments: [{ id: "k1", userId: "u3", text: "¡Por fin! 🙌", at: now - 600000 }],
+  },
+  {
+    id: "p2",
+    userId: "u2",
+    text: "Amanecer en el Huascarán esta mañana. Vale cada paso.",
+    image: mountain,
+    createdAt: now - 1000 * 60 * 90,
+    reactions: [{ emoji: "😍", userId: "u1" }, { emoji: "😆", userId: "u3" }],
+    comments: [],
+  },
+  {
+    id: "p3",
+    userId: "u3",
+    text: "Pensamiento del día: menos notificaciones, más conversaciones.",
+    createdAt: now - 1000 * 60 * 60 * 5,
+    reactions: [{ emoji: "😭", userId: "u1" }, { emoji: "👍", userId: "u2" }],
+    comments: [],
+  },
 ];
 
 const seedConvos: Conversation[] = [
@@ -40,7 +93,7 @@ type Ctx = State & {
   logout: () => void;
   updateMe: (p: Partial<User>) => void;
   addPost: (text: string, image?: string) => void;
-  toggleLike: (id: string) => void;
+  react: (id: string, emoji: ReactionEmoji) => void;
   addComment: (id: string, text: string) => void;
   sendMessage: (convoId: string, text: string, attachment?: Attachment) => void;
 };
@@ -56,7 +109,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     try {
       const raw = localStorage.getItem(KEY) ?? localStorage.getItem(LEGACY_KEY);
-      if (raw) setState(JSON.parse(raw));
+      if (raw) {
+        const saved = JSON.parse(raw) as Partial<State> & { posts?: (Partial<Post> & { likes?: string[] })[] };
+        setState({
+          me: saved.me ?? null,
+          convos: Array.isArray(saved.convos) ? saved.convos : seedConvos,
+          posts: Array.isArray(saved.posts) ? saved.posts.map(normalizePost) : seedPosts,
+        });
+      }
     } catch {}
     setLoaded(true);
   }, []);
@@ -85,14 +145,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     addPost: (text, image) =>
       setState((s) => ({
         ...s,
-        posts: [{ id: crypto.randomUUID(), userId: "me", text, image, createdAt: Date.now(), likes: [], comments: [] }, ...s.posts],
+        posts: [{ id: crypto.randomUUID(), userId: "me", text, image, createdAt: Date.now(), reactions: [], comments: [] }, ...s.posts],
       })),
-    toggleLike: (id) =>
+    react: (id, emoji) =>
       setState((s) => ({
         ...s,
-        posts: s.posts.map((p) =>
-          p.id !== id ? p : { ...p, likes: p.likes.includes("me") ? p.likes.filter((l) => l !== "me") : [...p.likes, "me"] },
-        ),
+        posts: s.posts.map((p) => (p.id === id ? reactTo(p, "me", emoji) : p)),
       })),
     addComment: (id, text) =>
       setState((s) => ({
