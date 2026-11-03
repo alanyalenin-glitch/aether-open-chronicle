@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Send } from "lucide-react";
+import { ArrowLeft, Phone, Video } from "lucide-react";
+import { AttachmentView, CallOverlay, Composer } from "@/components/ChatTools";
 import { AppShell, Avatar } from "@/components/AppShell";
 import { timeAgo, useStore } from "@/lib/store";
 
@@ -19,7 +20,7 @@ export const Route = createFileRoute("/messages")({
 function Messages() {
   const { convos, getUser, sendMessage } = useStore();
   const [openId, setOpenId] = useState<string | null>(null);
-  const [text, setText] = useState("");
+  const [call, setCall] = useState<null | "voice" | "video">(null);
   const endRef = useRef<HTMLDivElement>(null);
   const open = convos.find((c) => c.id === openId);
 
@@ -32,26 +33,24 @@ function Messages() {
         <div className="flex items-center gap-3 border-b px-5 py-3">
           <button onClick={() => setOpenId(null)} className="rounded-full p-1.5 transition hover:bg-secondary" aria-label="Volver"><ArrowLeft size={20} /></button>
           <Avatar user={u} size={34} />
-          <span className="font-semibold">{u?.name}</span>
+          <span className="flex-1 font-semibold">{u?.name}</span>
+          <button onClick={() => setCall("voice")} className="rounded-full p-2 transition hover:bg-secondary" aria-label="Llamar"><Phone size={20} /></button>
+          <button onClick={() => setCall("video")} className="rounded-full p-2 transition hover:bg-secondary" aria-label="Videollamada"><Video size={20} /></button>
         </div>
+        {call && <CallOverlay user={u} video={call === "video"} onEnd={() => setCall(null)} />}
         <div className="flex min-h-[55vh] flex-col gap-2 p-5">
           {open.messages.map((m, i) => (
             <div
               key={i}
               className={`fade-up max-w-[78%] rounded-2xl px-4 py-2.5 ${m.from === "me" ? "bg-luna self-end rounded-br-sm text-primary-foreground" : "self-start rounded-bl-sm bg-secondary"}`}
             >
+              {m.attachment && <AttachmentView a={m.attachment} mine={m.from === "me"} />}
               {m.text}
             </div>
           ))}
           <div ref={endRef} />
         </div>
-        <form
-          onSubmit={(e) => { e.preventDefault(); if (text.trim()) { sendMessage(open.id, text.trim()); setText(""); } }}
-          className="glass sticky bottom-0 flex gap-2 rounded-2xl border p-3"
-        >
-          <input value={text} onChange={(e) => setText(e.target.value)} placeholder="Escribe un mensaje…" className="flex-1 rounded-full border bg-input px-4 py-2.5 outline-none focus:ring-2 focus:ring-ring" />
-          <button className="bg-luna rounded-full p-3 text-primary-foreground transition active:scale-95" aria-label="Enviar"><Send size={18} /></button>
-        </form>
+        <Composer onSend={(t, a) => sendMessage(open.id, t, a)} />
       </AppShell>
     );
   }
@@ -69,7 +68,7 @@ function Messages() {
                 <span className="font-semibold">{u?.name}</span>
                 {last && <span className="text-xs text-muted-foreground">{timeAgo(last.at)}</span>}
               </div>
-              <p className="truncate text-sm text-muted-foreground">{last?.text ?? "Inicia la conversación"}</p>
+              <p className="truncate text-sm text-muted-foreground">{last ? last.text || (last.attachment?.kind === "voice" ? "🎤 Nota de voz" : `📎 ${last.attachment?.name ?? ""}`) : "Inicia la conversación"}</p>
             </div>
           </button>
         );
