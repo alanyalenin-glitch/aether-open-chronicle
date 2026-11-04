@@ -101,7 +101,7 @@ function PostCard({ post: p }: { post: Post }) {
       </div>
       {p.text && <p className="whitespace-pre-wrap px-4 pt-3 leading-relaxed">{p.text}</p>}
       {p.image && <img src={p.image} alt="" loading="lazy" className="mt-3 aspect-[4/3] w-full object-cover" />}
-      <div className="flex gap-2 overflow-x-auto px-3 pt-3 [scrollbar-width:none]" role="group" aria-label="Reacciones"> role="group" aria-label="Reacciones">
+      <div className="flex gap-2 overflow-x-auto px-3 pt-3 [scrollbar-width:none]" role="group" aria-label="Reacciones">
           {REACTIONS.map((e) => {
             const n = reactionCount(p, e);
             const mine = p.reactions.some((r) => r.emoji === e && r.userId === "me");
