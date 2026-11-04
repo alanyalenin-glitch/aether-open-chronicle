@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useRef, useState } from "react";
-import { ImagePlus, MessageCircle, Share2, Check, X } from "lucide-react";
+import { ImagePlus, MessageCircle, Share2, Check, X, Plus, Globe, MoreHorizontal } from "lucide-react";
 import { AppShell, Avatar } from "@/components/AppShell";
 import { REACTIONS, reactionCount, timeAgo, useStore, type Post } from "@/lib/store";
 
@@ -16,7 +16,8 @@ export const Route = createFileRoute("/feed")({
   component: Feed,
 });
 
-const card = "rounded-2xl border bg-card/70 backdrop-blur transition-colors";
+const card = "rounded-2xl border bg-card transition-colors";
+const LABELS: Record<string, string> = { "😆": "Risas", "😍": "Amo", "😭": "Triste", "👍": "Me gusta" };
 
 function Feed() {
   const { me, posts, addPost } = useStore();
@@ -40,43 +41,28 @@ function Feed() {
 
   return (
     <AppShell title="Inicio">
-      <div className={`${card} p-4`}>
-        <div className="flex gap-3">
-          <Avatar user={me ?? undefined} />
-          <div className="flex-1">
-            <textarea
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              placeholder="¿Qué estás pensando?"
-              rows={2}
-              className="w-full resize-none bg-transparent pt-2 outline-none placeholder:text-muted-foreground"
-            />
-            {image && (
-              <div className="relative mt-2 overflow-hidden rounded-xl border">
-                <img src={image} alt="" className="max-h-80 w-full object-cover" />
-                <button onClick={() => setImage(undefined)} className="glass absolute right-2 top-2 rounded-full p-1.5" aria-label="Quitar imagen">
-                  <X size={16} />
-                </button>
-              </div>
-            )}
-            <div className="mt-2 flex items-center justify-between border-t pt-3">
-              <button onClick={() => fileRef.current?.click()} className="rounded-full p-2 text-primary transition hover:bg-accent" aria-label="Añadir imagen">
-                <ImagePlus size={20} />
-              </button>
-              <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => pick(e.target.files?.[0])} />
-              <button
-                onClick={publish}
-                disabled={!text.trim() && !image}
-                className="bg-luna rounded-full px-5 py-2 text-sm font-semibold text-primary-foreground transition hover:opacity-90 active:scale-95 disabled:opacity-40"
-              >
-                Publicar
-              </button>
-            </div>
-          </div>
+      <div className="flex items-center gap-3 border-b pb-3">
+        <Avatar user={me ?? undefined} size={36} />
+        <div className="flex flex-1 items-center rounded-full bg-secondary pl-4 pr-1.5">
+          <input value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => e.key === "Enter" && publish()}
+            placeholder="¿Qué estás pensando?" className="min-w-0 flex-1 bg-transparent py-2.5 text-sm outline-none placeholder:text-muted-foreground" />
+          <button onClick={() => fileRef.current?.click()} className="rounded-full p-2 text-muted-foreground transition hover:text-primary" aria-label="Añadir imagen"><ImagePlus size={19} /></button>
+          <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => pick(e.target.files?.[0])} />
         </div>
       </div>
-      <p className="px-1 py-4 text-xs uppercase tracking-widest text-muted-foreground">Orden cronológico · sin algoritmos</p>
-      <div className="space-y-4">
+      {(text.trim() || image) && (
+        <div className="fade-up mt-3 space-y-2">
+          {image && (
+            <div className="relative overflow-hidden rounded-xl border">
+              <img src={image} alt="" className="max-h-80 w-full object-cover" />
+              <button onClick={() => setImage(undefined)} className="glass absolute right-2 top-2 rounded-full p-1.5" aria-label="Quitar imagen"><X size={16} /></button>
+            </div>
+          )}
+          <button onClick={publish} className="bg-luna w-full rounded-full py-2 text-sm font-semibold text-primary-foreground transition hover:opacity-90 active:scale-95">Publicar</button>
+        </div>
+      )}
+      <Stories />
+      <div className="space-y-3">
         {sorted.map((p) => <PostCard key={p.id} post={p} />)}
       </div>
     </AppShell>
@@ -100,22 +86,22 @@ function PostCard({ post: p }: { post: Post }) {
     } catch {}
   };
 
-  const btn = "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm transition hover:bg-secondary";
-  const pill = "flex items-center gap-1 rounded-full border border-transparent px-2 py-1 text-sm transition hover:bg-secondary active:scale-90";
+  const btn = "flex items-center gap-1.5 rounded-full px-2 py-1.5 text-xs transition hover:bg-secondary";
+  const pill = "flex shrink-0 items-center gap-1.5 rounded-full border bg-secondary px-3 py-1.5 text-sm transition hover:bg-accent active:scale-90";
 
   return (
-    <article className={`${card} fade-up overflow-hidden hover:bg-card`}>
+    <article className={`${card} fade-up overflow-hidden`}>
       <div className="flex items-center gap-3 px-4 pt-4">
         <Avatar user={u} />
         <div className="leading-tight">
           <p className="font-semibold">{u?.name}</p>
-          <p className="text-xs text-muted-foreground">@{u?.handle} · {timeAgo(p.createdAt)}</p>
+          <p className="flex items-center gap-1 text-xs text-muted-foreground">{timeAgo(p.createdAt)} · <Globe size={12} /></p>
         </div>
+        <MoreHorizontal size={20} className="ml-auto text-muted-foreground" />
       </div>
       {p.text && <p className="whitespace-pre-wrap px-4 pt-3 leading-relaxed">{p.text}</p>}
-      {p.image && <img src={p.image} alt="" loading="lazy" className="mt-3 max-h-[28rem] w-full object-cover" />}
-      <div className="mt-3 flex flex-wrap items-center gap-1 border-t px-2 py-1.5">
-        <div className="flex items-center gap-0.5" role="group" aria-label="Reacciones">
+      {p.image && <img src={p.image} alt="" loading="lazy" className="mt-3 aspect-[4/3] w-full object-cover" />}
+      <div className="flex gap-2 overflow-x-auto px-3 pt-3 [scrollbar-width:none]" role="group" aria-label="Reacciones"> role="group" aria-label="Reacciones">
           {REACTIONS.map((e) => {
             const n = reactionCount(p, e);
             const mine = p.reactions.some((r) => r.emoji === e && r.userId === "me");
@@ -128,16 +114,19 @@ function PostCard({ post: p }: { post: Post }) {
                 className={`${pill} ${mine ? "border-primary/40 bg-secondary" : ""}`}
               >
                 <span className={`text-base leading-none transition-transform ${mine ? "scale-110" : ""}`}>{e}</span>
+                <span className={`text-xs ${e === "😍" ? "text-destructive" : ""}`}>{LABELS[e]}</span>
                 <span className={`text-xs tabular-nums ${mine ? "text-foreground" : "text-muted-foreground"}`}>{n}</span>
               </button>
             );
           })}
-        </div>
+      </div>
+      <div className="flex items-center gap-1 px-2 py-1.5 text-xs text-muted-foreground">
+        <span className="px-2">{p.reactions.length} reacciones</span>
         <button onClick={() => setOpen(!open)} className={`${btn} ${open ? "text-primary" : "text-muted-foreground hover:text-primary"}`}>
-          <MessageCircle size={18} /> {p.comments.length}
+          <MessageCircle size={16} /> {p.comments.length} comentarios
         </button>
         <button onClick={share} className={`${btn} ml-auto text-muted-foreground hover:text-primary`}>
-          {shared ? <><Check size={18} /> Copiado</> : <><Share2 size={18} /> Compartir</>}
+          {shared ? <><Check size={16} /> Copiado</> : <><Share2 size={16} /> Compartir</>}
         </button>
       </div>
       {open && (
@@ -164,5 +153,32 @@ function PostCard({ post: p }: { post: Post }) {
         </div>
       )}
     </article>
+  );
+}
+
+function Stories() {
+  const { posts, getUser } = useStore();
+  const ids = [...new Set(posts.map((p) => p.userId))].filter((id) => id !== "me");
+  const tri = "relative flex h-24 w-[4.5rem] shrink-0 flex-col items-center justify-end";
+  return (
+    <div className="-mx-3 flex gap-1 overflow-x-auto px-3 py-3 [scrollbar-width:none]">
+      <button className={`${tri} rounded-xl border-2 border-primary bg-secondary shadow-[0_0_12px_color-mix(in_oklab,var(--primary)_45%,transparent)]`}>
+        <Plus className="mb-auto mt-4 text-primary" size={26} />
+        <span className="mb-1.5 text-[11px] leading-tight">Crear<br />historia</span>
+      </button>
+      {ids.map((id, i) => {
+        const u = getUser(id);
+        if (!u) return null;
+        return (
+          <div key={id} className={`${tri} drop-shadow-[0_0_6px_var(--primary)]`}>
+            <div className="absolute inset-0 bg-primary" style={{ clipPath: i % 2 ? "polygon(0 0,100% 0,50% 100%)" : "polygon(50% 0,100% 100%,0 100%)" }} />
+            <div className="absolute inset-[3px] flex items-center justify-center" style={{ clipPath: i % 2 ? "polygon(4% 2%,96% 2%,50% 96%)" : "polygon(50% 4%,96% 98%,4% 98%)", background: `linear-gradient(160deg, oklch(0.55 0.12 ${u.hue}), oklch(0.3 0.06 ${u.hue + 40}))` }}>
+              <span className={`font-display text-2xl font-semibold ${i % 2 ? "-mt-6" : "mt-6"}`}>{u.name.charAt(0)}</span>
+            </div>
+            <span className="relative mb-0.5 max-w-full truncate rounded px-1 text-[11px] font-medium">{u.name.split(" ")[0]}</span>
+          </div>
+        );
+      })}
+    </div>
   );
 }
