@@ -11,8 +11,12 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as FeedRouteImport } from './routes/feed'
+import { Route as FilosofiaRouteImport } from './routes/filosofia'
+import { Route as GruposRouteImport } from './routes/grupos'
 import { Route as MessagesRouteImport } from './routes/messages'
+import { Route as MusicaRouteImport } from './routes/musica'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as SinPublicidadRouteImport } from './routes/sin-publicidad'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -24,9 +28,24 @@ const FeedRoute = FeedRouteImport.update({
   path: '/feed',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FilosofiaRoute = FilosofiaRouteImport.update({
+  id: '/filosofia',
+  path: '/filosofia',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GruposRoute = GruposRouteImport.update({
+  id: '/grupos',
+  path: '/grupos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MessagesRoute = MessagesRouteImport.update({
   id: '/messages',
   path: '/messages',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MusicaRoute = MusicaRouteImport.update({
+  id: '/musica',
+  path: '/musica',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileRoute = ProfileRouteImport.update({
@@ -34,39 +53,85 @@ const ProfileRoute = ProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SinPublicidadRoute = SinPublicidadRouteImport.update({
+  id: '/sin-publicidad',
+  path: '/sin-publicidad',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/feed': typeof FeedRoute
+  '/filosofia': typeof FilosofiaRoute
+  '/grupos': typeof GruposRoute
   '/messages': typeof MessagesRoute
+  '/musica': typeof MusicaRoute
   '/profile': typeof ProfileRoute
+  '/sin-publicidad': typeof SinPublicidadRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/feed': typeof FeedRoute
+  '/filosofia': typeof FilosofiaRoute
+  '/grupos': typeof GruposRoute
   '/messages': typeof MessagesRoute
+  '/musica': typeof MusicaRoute
   '/profile': typeof ProfileRoute
+  '/sin-publicidad': typeof SinPublicidadRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/feed': typeof FeedRoute
+  '/filosofia': typeof FilosofiaRoute
+  '/grupos': typeof GruposRoute
   '/messages': typeof MessagesRoute
+  '/musica': typeof MusicaRoute
   '/profile': typeof ProfileRoute
+  '/sin-publicidad': typeof SinPublicidadRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/feed' | '/messages' | '/profile'
+  fullPaths:
+    | '/'
+    | '/feed'
+    | '/filosofia'
+    | '/grupos'
+    | '/messages'
+    | '/musica'
+    | '/profile'
+    | '/sin-publicidad'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/feed' | '/messages' | '/profile'
-  id: '__root__' | '/' | '/feed' | '/messages' | '/profile'
+  to:
+    | '/'
+    | '/feed'
+    | '/filosofia'
+    | '/grupos'
+    | '/messages'
+    | '/musica'
+    | '/profile'
+    | '/sin-publicidad'
+  id:
+    | '__root__'
+    | '/'
+    | '/feed'
+    | '/filosofia'
+    | '/grupos'
+    | '/messages'
+    | '/musica'
+    | '/profile'
+    | '/sin-publicidad'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   FeedRoute: typeof FeedRoute
+  FilosofiaRoute: typeof FilosofiaRoute
+  GruposRoute: typeof GruposRoute
   MessagesRoute: typeof MessagesRoute
+  MusicaRoute: typeof MusicaRoute
   ProfileRoute: typeof ProfileRoute
+  SinPublicidadRoute: typeof SinPublicidadRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -85,11 +150,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FeedRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/filosofia': {
+      id: '/filosofia'
+      path: '/filosofia'
+      fullPath: '/filosofia'
+      preLoaderRoute: typeof FilosofiaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/grupos': {
+      id: '/grupos'
+      path: '/grupos'
+      fullPath: '/grupos'
+      preLoaderRoute: typeof GruposRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/messages': {
       id: '/messages'
       path: '/messages'
       fullPath: '/messages'
       preLoaderRoute: typeof MessagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/musica': {
+      id: '/musica'
+      path: '/musica'
+      fullPath: '/musica'
+      preLoaderRoute: typeof MusicaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile': {
@@ -99,14 +185,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sin-publicidad': {
+      id: '/sin-publicidad'
+      path: '/sin-publicidad'
+      fullPath: '/sin-publicidad'
+      preLoaderRoute: typeof SinPublicidadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   FeedRoute: FeedRoute,
+  FilosofiaRoute: FilosofiaRoute,
+  GruposRoute: GruposRoute,
   MessagesRoute: MessagesRoute,
+  MusicaRoute: MusicaRoute,
   ProfileRoute: ProfileRoute,
+  SinPublicidadRoute: SinPublicidadRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

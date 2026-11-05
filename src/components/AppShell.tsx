@@ -43,8 +43,8 @@ export function AppShell({ title, children }: { title: string; children: ReactNo
           <Link to="/feed" className="font-display text-3xl font-light tracking-[0.12em] text-foreground">LUNA</Link>
           <div className="flex items-center gap-1">
             <button aria-label="Buscar" className="rounded-full p-2 text-foreground/80 transition hover:bg-secondary"><Search size={21} /></button>
-            <button aria-label="Música" className="rounded-full p-2 text-primary transition hover:bg-secondary"><Headphones size={21} /></button>
-            <Link to="/messages" aria-label="Amigos" className="rounded-full p-2 text-primary transition hover:bg-secondary"><Users size={22} fill="currentColor" /></Link>
+            <Link to="/musica" aria-label="Música" className="rounded-full p-2 text-primary transition hover:bg-secondary"><Headphones size={21} /></Link>
+            <Link to="/grupos" aria-label="Grupos públicos" className="rounded-full p-2 text-primary transition hover:bg-secondary"><Users size={22} fill="currentColor" /></Link>
             <button onClick={() => { logout(); navigate({ to: "/" }); }} aria-label="Salir" className="rounded-full p-2 text-muted-foreground transition hover:text-destructive"><LogOut size={18} /></button>
           </div>
         </div>

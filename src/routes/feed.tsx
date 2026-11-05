@@ -1,16 +1,17 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useRef, useState } from "react";
-import { ImagePlus, MessageCircle, Share2, Check, X, Plus, Globe, MoreHorizontal } from "lucide-react";
+import { ImagePlus, MessageCircle, Share2, Check, X, Plus, Globe, MoreHorizontal, Megaphone } from "lucide-react";
 import { AppShell, Avatar } from "@/components/AppShell";
+import { promotionalReason } from "@/lib/content-policy";
 import { REACTIONS, reactionCount, timeAgo, useStore, type Post } from "@/lib/store";
 
 export const Route = createFileRoute("/feed")({
   head: () => ({
     meta: [
       { title: "Inicio — Luna" },
-      { name: "description", content: "Tu muro cronológico en Luna, sin algoritmos ocultos." },
+      { name: "description", content: "Tu muro cronológico en Luna, sin algoritmos ocultos ni publicidad." },
       { property: "og:title", content: "Inicio — Luna" },
-      { property: "og:description", content: "Publicaciones en orden cronológico." },
+      { property: "og:description", content: "Publicaciones en orden cronológico, sin publicidad." },
     ],
   }),
   component: Feed,
@@ -23,6 +24,7 @@ function Feed() {
   const { me, posts, addPost } = useStore();
   const [text, setText] = useState("");
   const [image, setImage] = useState<string>();
+  const [blocked, setBlocked] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const pick = (f?: File) => {
@@ -33,9 +35,12 @@ function Feed() {
   };
   const publish = () => {
     if (!text.trim() && !image) return;
+    const why = text.trim() ? promotionalReason(text) : null;
+    if (why) { setBlocked(why); return; }
     addPost(text.trim(), image);
     setText("");
     setImage(undefined);
+    setBlocked(null);
   };
   const sorted = [...posts].sort((a, b) => b.createdAt - a.createdAt);
 
@@ -44,12 +49,23 @@ function Feed() {
       <div className="flex items-center gap-3 border-b pb-3">
         <Avatar user={me ?? undefined} size={36} />
         <div className="flex flex-1 items-center rounded-full bg-secondary pl-4 pr-1.5">
-          <input value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => e.key === "Enter" && publish()}
+          <input value={text} onChange={(e) => { setText(e.target.value); setBlocked(null); }} onKeyDown={(e) => e.key === "Enter" && publish()}
             placeholder="¿Qué estás pensando?" className="min-w-0 flex-1 bg-transparent py-2.5 text-sm outline-none placeholder:text-muted-foreground" />
           <button onClick={() => fileRef.current?.click()} className="rounded-full p-2 text-muted-foreground transition hover:text-primary" aria-label="Añadir imagen"><ImagePlus size={19} /></button>
           <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => pick(e.target.files?.[0])} />
         </div>
       </div>
+      {blocked && (
+        <div className="fade-up mt-3 flex items-start gap-2 rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-sm">
+          <Megaphone size={16} className="mt-0.5 shrink-0 text-destructive" />
+          <p className="text-foreground">
+            {blocked}{" "}
+            <Link to="/sin-publicidad" className="text-primary underline-offset-4 hover:underline">
+              Ver la regla
+            </Link>
+          </p>
+        </div>
+      )}
       {(text.trim() || image) && (
         <div className="fade-up mt-3 space-y-2">
           {image && (
@@ -65,6 +81,12 @@ function Feed() {
       <div className="space-y-3">
         {sorted.map((p) => <PostCard key={p.id} post={p} />)}
       </div>
+      <footer className="mt-8 border-t pt-4 text-center text-xs text-muted-foreground">
+        Luna es sin publicidad: videos, música y publicaciones legítimas, siempre.{" "}
+        <Link to="/filosofia" className="text-primary underline-offset-4 hover:underline">Filosofía de contenido</Link>
+        {" · "}
+        <Link to="/sin-publicidad" className="text-primary underline-offset-4 hover:underline">Cero publicidad</Link>
+      </footer>
     </AppShell>
   );
 }
