@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useCallback, useState } from "react";
 import { z } from "zod";
 import { useStore } from "@/lib/store";
@@ -61,6 +61,15 @@ function Welcome() {
       <div className="fade-up w-full max-w-sm">
         <h1 className="text-center text-6xl font-bold text-luna">Luna</h1>
         <p className="mt-3 text-center text-muted-foreground">Personas, no algoritmos. Tu muro, en orden cronológico.</p>
+
+        <p className="glass mt-4 rounded-2xl border p-3 text-center text-xs leading-relaxed text-muted-foreground">
+          En Luna caben todos los videos, la música y las publicaciones legítimas de sus miembros,
+          para disfrutar sanamente. La publicidad, los anuncios patrocinados, el contenido de
+          influencers corporativos y las promociones comerciales están prohibidos.{" "}
+          <Link to="/filosofia" className="text-primary underline-offset-4 hover:underline">Filosofía de contenido</Link>
+          {" · "}
+          <Link to="/sin-publicidad" className="text-primary underline-offset-4 hover:underline">Cero publicidad</Link>
+        </p>
 
         {mode === "login" ? (
           <form

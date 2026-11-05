@@ -3,6 +3,7 @@ import { Users } from "lucide-react";
 import { useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { publicGroups } from "@/lib/catalog";
+import { useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/grupos")({
   head: () => ({
@@ -17,7 +18,7 @@ export const Route = createFileRoute("/grupos")({
 });
 
 function Grupos() {
-  const { me } = useStoreMe();
+  const { me } = useStore();
   const [joined, setJoined] = useState<string[]>([]);
   const toggle = (id: string) =>
     setJoined((j) => (j.includes(id) ? j.filter((x) => x !== id) : [...j, id]));
@@ -35,7 +36,7 @@ function Grupos() {
 
       <ul className="mt-5 space-y-3">
         {publicGroups.map((g) => {
-          const in_ = joined.includes(g.id);
+          const isIn = joined.includes(g.id);
           return (
             <li key={g.id} className="fade-up flex items-center gap-3 rounded-2xl border bg-card p-4">
               <span
@@ -49,17 +50,17 @@ function Grupos() {
                 <p className="truncate font-semibold">{g.name}</p>
                 <p className="truncate text-xs text-muted-foreground">{g.topic}</p>
                 <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
-                  <Users size={12} /> {g.members + (in_ ? 1 : 0)} miembros
+                  <Users size={12} /> {g.members + (isIn ? 1 : 0)} miembros
                 </p>
               </div>
               <button
                 onClick={() => toggle(g.id)}
-                aria-pressed={in_}
+                aria-pressed={isIn}
                 className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition active:scale-95 ${
-                  in_ ? "border text-muted-foreground" : "bg-luna text-primary-foreground"
+                  isIn ? "border text-muted-foreground" : "bg-luna text-primary-foreground"
                 }`}
               >
-                {in_ ? "Saliendo" : "Unirme"}
+                {isIn ? "Dentro" : "Unirme"}
               </button>
             </li>
           );
@@ -71,9 +72,4 @@ function Grupos() {
       </p>
     </AppShell>
   );
-}
-
-import { useStore } from "@/lib/store";
-function useStoreMe() {
-  return useStore();
 }
