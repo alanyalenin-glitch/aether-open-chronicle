@@ -1,7 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useRef, useState } from "react";
-import { ImagePlus, MessageCircle, Share2, Check, X, Plus, Globe, MoreHorizontal } from "lucide-react";
+import { ImagePlus, MessageCircle, Share2, Check, X, Plus, Globe, MoreHorizontal, Megaphone } from "lucide-react";
 import { AppShell, Avatar } from "@/components/AppShell";
+import { promotionalReason } from "@/lib/content-policy";
 import { REACTIONS, reactionCount, timeAgo, useStore, type Post } from "@/lib/store";
 
 export const Route = createFileRoute("/feed")({
@@ -23,6 +24,7 @@ function Feed() {
   const { me, posts, addPost } = useStore();
   const [text, setText] = useState("");
   const [image, setImage] = useState<string>();
+  const [blocked, setBlocked] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const pick = (f?: File) => {
@@ -33,9 +35,12 @@ function Feed() {
   };
   const publish = () => {
     if (!text.trim() && !image) return;
+    const why = text.trim() ? promotionalReason(text) : null;
+    if (why) { setBlocked(why); return; }
     addPost(text.trim(), image);
     setText("");
     setImage(undefined);
+    setBlocked(null);
   };
   const sorted = [...posts].sort((a, b) => b.createdAt - a.createdAt);
 
@@ -44,7 +49,7 @@ function Feed() {
       <div className="flex items-center gap-3 border-b pb-3">
         <Avatar user={me ?? undefined} size={36} />
         <div className="flex flex-1 items-center rounded-full bg-secondary pl-4 pr-1.5">
-          <input value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => e.key === "Enter" && publish()}
+          <input value={text} onChange={(e) => { setText(e.target.value); setBlocked(null); }} onKeyDown={(e) => e.key === "Enter" && publish()}
             placeholder="¿Qué estás pensando?" className="min-w-0 flex-1 bg-transparent py-2.5 text-sm outline-none placeholder:text-muted-foreground" />
           <button onClick={() => fileRef.current?.click()} className="rounded-full p-2 text-muted-foreground transition hover:text-primary" aria-label="Añadir imagen"><ImagePlus size={19} /></button>
           <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => pick(e.target.files?.[0])} />
