@@ -112,7 +112,7 @@ function PostCard({ post: p }: { post: Post }) {
   const pill = "flex shrink-0 items-center gap-1.5 rounded-full border bg-secondary px-3 py-1.5 text-sm transition hover:bg-accent active:scale-90";
 
   return (
-    <article className={`${card} fade-up overflow-hidden`}>
+    <article id={p.id} className={`${card} fade-up scroll-mt-20 overflow-hidden`}>
       <div className="flex items-center gap-3 px-4 pt-4">
         <Avatar user={u} />
         <div className="leading-tight">
