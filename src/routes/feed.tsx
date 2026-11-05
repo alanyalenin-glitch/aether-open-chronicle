@@ -9,9 +9,9 @@ export const Route = createFileRoute("/feed")({
   head: () => ({
     meta: [
       { title: "Inicio — Luna" },
-      { name: "description", content: "Tu muro cronológico en Luna, sin algoritmos ocultos." },
+      { name: "description", content: "Tu muro cronológico en Luna, sin algoritmos ocultos ni publicidad." },
       { property: "og:title", content: "Inicio — Luna" },
-      { property: "og:description", content: "Publicaciones en orden cronológico." },
+      { property: "og:description", content: "Publicaciones en orden cronológico, sin publicidad." },
     ],
   }),
   component: Feed,
@@ -55,6 +55,17 @@ function Feed() {
           <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => pick(e.target.files?.[0])} />
         </div>
       </div>
+      {blocked && (
+        <div className="fade-up mt-3 flex items-start gap-2 rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-sm">
+          <Megaphone size={16} className="mt-0.5 shrink-0 text-destructive" />
+          <p className="text-foreground">
+            {blocked}{" "}
+            <Link to="/sin-publicidad" className="text-primary underline-offset-4 hover:underline">
+              Ver la regla
+            </Link>
+          </p>
+        </div>
+      )}
       {(text.trim() || image) && (
         <div className="fade-up mt-3 space-y-2">
           {image && (
@@ -70,6 +81,12 @@ function Feed() {
       <div className="space-y-3">
         {sorted.map((p) => <PostCard key={p.id} post={p} />)}
       </div>
+      <footer className="mt-8 border-t pt-4 text-center text-xs text-muted-foreground">
+        Luna es sin publicidad: videos, música y publicaciones legítimas, siempre.{" "}
+        <Link to="/filosofia" className="text-primary underline-offset-4 hover:underline">Filosofía de contenido</Link>
+        {" · "}
+        <Link to="/sin-publicidad" className="text-primary underline-offset-4 hover:underline">Cero publicidad</Link>
+      </footer>
     </AppShell>
   );
 }
