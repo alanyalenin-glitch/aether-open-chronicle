@@ -8,3 +8,6 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Keep navigation search and activity derivation in browser-safe helpers; search only public profile fields to avoid exposing registration details.
+- Use shared navigation dialogs in AppShell and local sample audio in the music page; these controls work without external services.

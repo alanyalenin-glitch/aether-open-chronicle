@@ -1,7 +1,9 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Home, MessageCircle, User as UserIcon, LogOut, Search, Headphones, Users, Bell } from "lucide-react";
 import { useStore, type User } from "@/lib/store";
+import { Button } from "@/components/ui/button";
+import { NotificationsPanel, SearchPanel } from "@/components/NavigationPanels";
 
 export function Avatar({ user, size = 40 }: { user?: User | undefined; size?: number }) {
   if (!user) return null;
@@ -29,6 +31,8 @@ const nav = [
 export function AppShell({ title, children }: { title: string; children: ReactNode }) {
   const { me, logout } = useStore();
   const navigate = useNavigate();
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
   useEffect(() => {
     const t = setTimeout(() => {
       if (!me) navigate({ to: "/" });
@@ -42,10 +46,11 @@ export function AppShell({ title, children }: { title: string; children: ReactNo
         <div className="mx-auto flex h-14 max-w-2xl items-center justify-between px-4">
           <Link to="/feed" className="font-display text-3xl font-light tracking-[0.12em] text-foreground">LUNA</Link>
           <div className="flex items-center gap-1">
-            <button aria-label="Buscar" className="rounded-full p-2 text-foreground/80 transition hover:bg-secondary"><Search size={21} /></button>
-            <Link to="/musica" aria-label="Música" className="rounded-full p-2 text-primary transition hover:bg-secondary"><Headphones size={21} /></Link>
-            <Link to="/grupos" aria-label="Grupos públicos" className="rounded-full p-2 text-primary transition hover:bg-secondary"><Users size={22} fill="currentColor" /></Link>
-            <button onClick={() => { logout(); navigate({ to: "/" }); }} aria-label="Salir" className="rounded-full p-2 text-muted-foreground transition hover:text-destructive"><LogOut size={18} /></button>
+            <Button variant="ghost" size="icon" title="Buscar" aria-label="Buscar" onClick={() => setSearchOpen(true)} className="rounded-full text-foreground/80"><Search /></Button>
+            <Button asChild variant="ghost" size="icon" className="rounded-full text-primary"><Link to="/musica" title="Música" aria-label="Música"><Headphones /></Link></Button>
+            <Button asChild variant="ghost" size="icon" className="rounded-full text-primary"><Link to="/grupos" title="Grupos públicos" aria-label="Grupos públicos"><Users /></Link></Button>
+            <Button variant="ghost" size="icon" title="Notificaciones" aria-label="Notificaciones" onClick={() => setNotificationsOpen(true)} className="rounded-full text-foreground/80"><Bell /></Button>
+            <Button variant="ghost" size="icon" title="Salir" onClick={() => { logout(); navigate({ to: "/" }); }} aria-label="Salir" className="rounded-full text-muted-foreground hover:text-destructive"><LogOut /></Button>
           </div>
         </div>
       </header>
@@ -62,11 +67,11 @@ export function AppShell({ title, children }: { title: string; children: ReactNo
               <Icon size={23} />
             </Link>
           ))}
-          <button aria-label="Notificaciones" className="relative flex h-full flex-1 items-center justify-center text-muted-foreground hover:text-foreground">
-            <Bell size={23} /><span className="absolute right-[calc(50%-14px)] top-3 h-2.5 w-2.5 rounded-full bg-destructive" />
-          </button>
+          <Button variant="ghost" aria-label="Notificaciones" onClick={() => setNotificationsOpen(true)} className="relative h-full flex-1 rounded-none text-muted-foreground hover:text-foreground"><Bell className="size-6" /></Button>
         </div>
       </nav>
+      <SearchPanel open={searchOpen} onOpenChange={setSearchOpen} />
+      <NotificationsPanel open={notificationsOpen} onOpenChange={setNotificationsOpen} />
     </div>
   );
 }

@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Music, Play, Pause } from "lucide-react";
-import { useState } from "react";
+import { Music, Play, Pause, SkipBack, SkipForward } from "lucide-react";
+import { useRef, useState } from "react";
 import { AppShell } from "@/components/AppShell";
+import { Button } from "@/components/ui/button";
 import { tracks } from "@/lib/catalog";
 
 export const Route = createFileRoute("/musica")({
@@ -17,7 +18,19 @@ export const Route = createFileRoute("/musica")({
 });
 
 function Musica() {
-  const [playing, setPlaying] = useState<string | null>(null);
+  const [selected, setSelected] = useState(0);
+  const [playing, setPlaying] = useState(false);
+  const [error, setError] = useState("");
+  const audio = useRef<HTMLAudioElement>(null);
+  const current = tracks[selected];
+  const playTrack = async (index: number) => {
+    const player = audio.current;
+    if (!player) return;
+    setError("");
+    if (index === selected && !player.paused) { player.pause(); return; }
+    if (index !== selected) { setSelected(index); player.src = `/audio/luna-muestra-${index + 1}.wav`; player.load(); }
+    try { await player.play(); } catch { setError("No se pudo reproducir el audio. Inténtalo de nuevo."); }
+  };
 
   return (
     <AppShell title="Música">
@@ -30,32 +43,43 @@ function Musica() {
         </Link>
       </p>
 
+      <section className="mt-5 border-y py-4" aria-label="Reproductor de música">
+        <p className="text-xs font-semibold text-primary">{playing ? "Reproduciendo" : "En pausa"}</p>
+        <h3 className="mt-1 font-semibold">{current?.title}</h3>
+        <p className="text-sm text-muted-foreground">{current?.artist} · Muestra de audio</p>
+        <div className="mt-3 flex items-center justify-center gap-3">
+          <Button size="icon" variant="ghost" aria-label="Pista anterior" title="Pista anterior" onClick={() => playTrack((selected + tracks.length - 1) % tracks.length)}><SkipBack /></Button>
+          <Button size="icon" aria-label={playing ? "Pausar música" : "Reproducir música"} title={playing ? "Pausar" : "Reproducir"} onClick={() => playTrack(selected)}>{playing ? <Pause /> : <Play />}</Button>
+          <Button size="icon" variant="ghost" aria-label="Pista siguiente" title="Pista siguiente" onClick={() => playTrack((selected + 1) % tracks.length)}><SkipForward /></Button>
+        </div>
+        <audio ref={audio} src="/audio/luna-muestra-1.wav" controls preload="metadata" className="mt-3 w-full" onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)} onEnded={() => setPlaying(false)} onError={() => setError("No se pudo cargar el audio.")} />
+        {error && <p role="alert" className="mt-2 text-sm text-destructive">{error}</p>}
+      </section>
       <ul className="mt-5 space-y-2">
-        {tracks.map((t) => {
-          const on = playing === t.id;
+        {tracks.map((t, index) => {
+          const on = selected === index && playing;
           return (
             <li key={t.id} className={`fade-up flex items-center gap-3 rounded-2xl border p-3 transition ${on ? "bg-secondary" : "bg-card"}`}>
-              <button
-                onClick={() => setPlaying(on ? null : t.id)}
+              <Button variant={on ? "default" : "secondary"} size="icon"
+                onClick={() => playTrack(index)}
                 aria-pressed={on}
                 aria-label={on ? `Pausar ${t.title}` : `Reproducir ${t.title}`}
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-primary-foreground transition active:scale-90"
-                style={{ background: `linear-gradient(135deg, oklch(0.8 0.12 ${t.hue}), oklch(0.5 0.12 ${t.hue + 40}))` }}
+                className="shrink-0 rounded-full"
               >
                 {on ? <Pause size={17} /> : <Play size={17} className="ml-0.5" />}
-              </button>
+              </Button>
               <div className="min-w-0 flex-1">
                 <p className="truncate font-medium">{t.title}</p>
                 <p className="truncate text-xs text-muted-foreground">{t.artist}</p>
               </div>
-              <span className="shrink-0 text-xs tabular-nums text-muted-foreground">{t.length}</span>
+              <span className="shrink-0 text-xs tabular-nums text-muted-foreground">0:20</span>
             </li>
           );
         })}
       </ul>
 
       <p className="mt-6 flex items-center gap-2 text-xs text-muted-foreground">
-        <Music size={13} /> Reproducción simulada: sirve para mostrar cómo se organiza la música en Luna.
+        <Music size={13} /> Audios de muestra originales; títulos y artistas de ejemplo.
       </p>
     </AppShell>
   );
