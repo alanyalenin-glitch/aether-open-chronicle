@@ -11,6 +11,8 @@ export const Route = createFileRoute("/grupos")({
       { title: "Grupos públicos — Luna" },
       { name: "description", content: "Grupos públicos de Luna: temas, personas y publicaciones legítimas, sin publicidad." },
       { property: "og:title", content: "Grupos públicos — Luna" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { property: "og:description", content: "Entra a un grupo público y comparte con las personas de Luna." },
     ],
   }),

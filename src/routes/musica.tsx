@@ -11,6 +11,8 @@ export const Route = createFileRoute("/musica")({
       { title: "Música — Luna" },
       { name: "description", content: "Música compartida por los miembros de Luna. Sin anuncios, sin promociones." },
       { property: "og:title", content: "Música — Luna" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { property: "og:description", content: "Música legítima de la comunidad, sin publicidad." },
     ],
   }),
