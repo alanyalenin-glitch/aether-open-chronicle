@@ -10,6 +10,8 @@ export const Route = createFileRoute("/profile")({
       { title: "Perfil — Luna" },
       { name: "description", content: "Personaliza tu perfil en Luna." },
       { property: "og:title", content: "Perfil — Luna" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { property: "og:description", content: "Tu perfil personalizado en Luna." },
     ],
   }),

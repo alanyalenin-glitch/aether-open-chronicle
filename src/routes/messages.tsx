@@ -11,6 +11,8 @@ export const Route = createFileRoute("/messages")({
       { title: "Mensajes — Luna" },
       { name: "description", content: "Mensajes directos en Luna." },
       { property: "og:title", content: "Mensajes — Luna" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { property: "og:description", content: "Conversaciones privadas en Luna." },
     ],
   }),

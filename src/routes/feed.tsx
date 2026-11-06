@@ -11,6 +11,8 @@ export const Route = createFileRoute("/feed")({
       { title: "Inicio — Luna" },
       { name: "description", content: "Tu muro cronológico en Luna, sin algoritmos ocultos ni publicidad." },
       { property: "og:title", content: "Inicio — Luna" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { property: "og:description", content: "Publicaciones en orden cronológico, sin publicidad." },
     ],
   }),
