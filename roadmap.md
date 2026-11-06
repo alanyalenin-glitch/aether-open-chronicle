@@ -1,5 +1,6 @@
-# Navigation repair
-- [x] Make search find public users and feed posts.
-- [x] Connect music to playable sample audio and playback controls.
-- [x] Connect public groups and a notification panel.
-- [x] Verify navigation on desktop and mobile, tests, and page metadata.
+# Luna functional improvements
+- [ ] Harden header dialogs and keep music playing across pages.
+- [ ] Add videos and reels with lazy loading and offscreen playback control.
+- [ ] Add categorized public groups, instant joining, group creation and shareable invitation links.
+- [ ] Secure private profiles with Cloud accounts and owner-only access; retain clearly labeled simulated facial verification.
+- [ ] Test registration, privacy rules, playback and group flows on desktop and mobile.
