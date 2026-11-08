@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Lock } from "lucide-react";
 import { AppShell, Avatar } from "@/components/AppShell";
+import { useAccount } from "@/lib/account";
 import { timeAgo, useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/profile")({
@@ -22,6 +23,7 @@ const hues = [185, 240, 300, 20, 60, 140];
 
 function Profile() {
   const { me, posts, updateMe } = useStore();
+  const { privateInfo } = useAccount();
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState("");
   const [bio, setBio] = useState("");
@@ -45,7 +47,7 @@ function Profile() {
         </div>
         {editing ? (
           <div className="fade-up mt-4 space-y-3">
-            <input value={name} onChange={(e) => setName(e.target.value)} className="w-full rounded-xl border bg-input px-4 py-2.5 outline-none focus:ring-2 focus:ring-ring" />
+            <input disabled aria-label="Nombre público" value={name} onChange={(e) => setName(e.target.value)} className="w-full rounded-xl border bg-input px-4 py-2.5 outline-none focus:ring-2 focus:ring-ring" />
             <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={2} className="w-full resize-none rounded-xl border bg-input px-4 py-2.5 outline-none focus:ring-2 focus:ring-ring" />
             <div className="flex gap-2">
               {hues.map((h) => (
@@ -79,17 +81,17 @@ function Profile() {
             <h3 className="text-sm font-semibold">Configuración privada</h3>
           </div>
           <p className="mt-1 text-xs text-muted-foreground">Solo tú ves estos datos. Los demás solo ven «{me.name}».</p>
-          {me.private ? (
+          {privateInfo ? (
             <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
-              <dt className="text-muted-foreground">Nombre completo</dt><dd>{me.private.fullName}</dd>
-              <dt className="text-muted-foreground">Correo</dt><dd className="break-all">{me.private.email}</dd>
-              <dt className="text-muted-foreground">Nacimiento</dt><dd>{new Date(me.private.birthDate + "T00:00").toLocaleDateString("es")}</dd>
-              <dt className="text-muted-foreground">Signo</dt><dd>{me.private.zodiac}</dd>
+              <dt className="text-muted-foreground">Nombre completo</dt><dd>{privateInfo.fullName}</dd>
+              <dt className="text-muted-foreground">Correo</dt><dd className="break-all">{privateInfo.email}</dd>
+              <dt className="text-muted-foreground">Nacimiento</dt><dd>{new Date(privateInfo.birthDate + "T00:00").toLocaleDateString("es")}</dd>
+              <dt className="text-muted-foreground">Signo</dt><dd>{privateInfo.zodiac}</dd>
               <dt className="text-muted-foreground">Verificación facial</dt>
-              <dd className={me.private.faceVerified ? "text-primary" : "text-muted-foreground"}>{me.private.faceVerified ? "Verificado ✓" : "Pendiente"}</dd>
+              <dd className={privateInfo.faceVerified ? "text-primary" : "text-muted-foreground"}>{privateInfo.faceVerified ? "Simulación completada" : "Pendiente"}</dd>
             </dl>
           ) : (
-            <p className="mt-3 text-sm text-muted-foreground">Entraste sin registrarte, así que no hay datos privados guardados.</p>
+            <p className="mt-3 text-sm text-muted-foreground">Completa tus datos de registro desde la pantalla de bienvenida.</p>
           )}
         </section>
       </div>

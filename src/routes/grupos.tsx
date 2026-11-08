@@ -1,77 +1,31 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Users } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
+import { Plus, Users, Link as LinkIcon, Check } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
-import { publicGroups } from "@/lib/catalog";
-import { useStore } from "@/lib/store";
-
-export const Route = createFileRoute("/grupos")({
-  head: () => ({
-    meta: [
-      { title: "Grupos públicos — Luna" },
-      { name: "description", content: "Grupos públicos de Luna: temas, personas y publicaciones legítimas, sin publicidad." },
-      { property: "og:title", content: "Grupos públicos — Luna" },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-      { property: "og:description", content: "Entra a un grupo público y comparte con las personas de Luna." },
-    ],
-  }),
-  component: Grupos,
-});
-
-function Grupos() {
-  const { me } = useStore();
-  const [joined, setJoined] = useState<string[]>([]);
-  const toggle = (id: string) =>
-    setJoined((j) => (j.includes(id) ? j.filter((x) => x !== id) : [...j, id]));
-
-  return (
-    <AppShell title="Grupos públicos">
-      <h2 className="text-xl font-semibold">Grupos públicos</h2>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Cualquiera puede verlos y entrar. Se comparte contenido legítimo: fotos, videos, música.
-        Nada de publicidad ni promociones.{" "}
-        <Link to="/sin-publicidad" className="text-primary underline-offset-4 hover:underline">
-          Cero publicidad
-        </Link>
-      </p>
-
-      <ul className="mt-5 space-y-3">
-        {publicGroups.map((g) => {
-          const isIn = joined.includes(g.id);
-          return (
-            <li key={g.id} className="fade-up flex items-center gap-3 rounded-2xl border bg-card p-4">
-              <span
-                className="h-11 w-11 shrink-0"
-                style={{
-                  clipPath: "polygon(50% 0,100% 100%,0 100%)",
-                  background: `linear-gradient(160deg, oklch(0.8 0.12 ${g.hue}), oklch(0.4 0.1 ${g.hue + 40}))`,
-                }}
-              />
-              <div className="min-w-0 flex-1">
-                <p className="truncate font-semibold">{g.name}</p>
-                <p className="truncate text-xs text-muted-foreground">{g.topic}</p>
-                <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
-                  <Users size={12} /> {g.members + (isIn ? 1 : 0)} miembros
-                </p>
-              </div>
-              <button
-                onClick={() => toggle(g.id)}
-                aria-pressed={isIn}
-                className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition active:scale-95 ${
-                  isIn ? "border text-muted-foreground" : "bg-luna text-primary-foreground"
-                }`}
-              >
-                {isIn ? "Dentro" : "Unirme"}
-              </button>
-            </li>
-          );
-        })}
-      </ul>
-
-      <p className="mt-6 text-xs text-muted-foreground">
-        Estás viendo los grupos como {me?.name ?? "invitado"}. Tus datos privados no aparecen aquí.
-      </p>
-    </AppShell>
-  );
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { supabase } from "@/integrations/supabase/client";
+import { useAccount } from "@/lib/account";
+import { createGroup } from "@/lib/account.functions";
+export const Route = createFileRoute("/grupos")({ validateSearch: (search: Record<string, unknown>) => ({ invite: typeof search['invite'] === "string" ? search['invite'] : "" }), head: () => ({ meta: [{ title: "Comunidades y grupos públicos — Luna" }, { name: "description", content: "Crea comunidades, comparte enlaces y únete a grupos de Luna al instante." }, { property: "og:title", content: "Comunidades y grupos públicos — Luna" }, { property: "og:description", content: "Grupos libres por categorías, sin publicidad." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }), component: Groups });
+const categories = ["Todos", "Arte", "Música", "Naturaleza", "Tecnología", "Cocina", "Otros"];
+function Groups() {
+ const { user } = useAccount(); const { invite } = Route.useSearch(); const queries = useQueryClient(); const create = useServerFn(createGroup);
+ const [category, setCategory] = useState("Todos"); const [open, setOpen] = useState(false); const [form, setForm] = useState({ name: "", description: "", category: "Otros" }); const [message, setMessage] = useState(""); const [copied, setCopied] = useState("");
+ const groups = useQuery({ queryKey: ["groups"], queryFn: async () => { const { data, error } = await supabase.from("groups").select("id,name,description,category").order("created_at", { ascending: false }).limit(500); if (error) throw new Error("No se pudieron cargar los grupos."); return data; } });
+ const members = useQuery({ queryKey: ["group-members", user?.id], enabled: !!user, queryFn: async () => { const { data, error } = await supabase.from("group_members").select("group_id,user_id").limit(1000); if (error) throw new Error("No se pudieron cargar las membresías."); return data; } });
+ const join = useMutation({ mutationFn: async ({ id, joined }: { id: string; joined: boolean }) => { if (!user) throw new Error("Inicia sesión para unirte."); const result = joined ? await supabase.from("group_members").delete().eq("group_id", id).eq("user_id", user.id) : await supabase.from("group_members").upsert({ group_id: id, user_id: user.id }, { onConflict: "group_id,user_id", ignoreDuplicates: true }); if (result.error) throw new Error("No se pudo actualizar tu membresía."); }, onSuccess: () => { void queries.invalidateQueries({ queryKey: ["group-members"] }); }, onError: (e) => setMessage(e.message) });
+ const make = useMutation({ mutationFn: () => create({ data: form }), onSuccess: () => { setOpen(false); setForm({ name: "", description: "", category: "Otros" }); void queries.invalidateQueries({ queryKey: ["groups"] }); void queries.invalidateQueries({ queryKey: ["group-members"] }); }, onError: (e) => setMessage(e.message) });
+ const items = (groups.data ?? []).filter((g) => invite ? g.id === invite : category === "Todos" || g.category === category);
+ return <AppShell title="Grupos públicos"><div className="flex items-center justify-between gap-3"><h2 className="text-xl font-semibold">Comunidades</h2><Button size="icon" aria-label="Crear grupo" title="Crear grupo" disabled={!user} onClick={() => { setMessage(""); setOpen(true); }}><Plus /></Button></div>
+ <div className="my-4 flex flex-wrap gap-2">{categories.map((c) => <Button key={c} size="sm" variant={category === c ? "default" : "ghost"} onClick={() => setCategory(c)}>{c}</Button>)}</div>
+ {invite && <p className="mb-3 text-sm text-primary">Invitación a una comunidad · <Link to="/grupos" search={{ invite: "" }}>Ver todos</Link></p>}
+ {message && <p role="alert" className="my-3 text-sm text-destructive">{message}</p>}{groups.isPending && <p role="status">Cargando comunidades…</p>}{groups.isError && <Button variant="outline" onClick={() => groups.refetch()}>Reintentar</Button>}
+ <ul className="space-y-3">{items.map((group) => { const joined = members.data?.some((m) => m.group_id === group.id && m.user_id === user?.id) ?? false; const count = members.data?.filter((m) => m.group_id === group.id).length ?? 0; return <li key={group.id} className="rounded-lg border bg-card p-4"><p className="text-xs text-primary">{group.category}</p><h3 className="mt-1 break-words font-semibold">{group.name}</h3><p className="mt-1 break-words text-sm text-muted-foreground">{group.description}</p><div className="mt-3 flex items-center gap-2"><span className="mr-auto flex items-center gap-1 text-xs text-muted-foreground"><Users size={14} />{count} miembros</span><Button variant="ghost" size="icon" aria-label={`Copiar enlace de ${group.name}`} onClick={async () => { try { await navigator.clipboard.writeText(`${window.location.origin}/grupos?invite=${group.id}`); setCopied(group.id); } catch { setMessage("No se pudo copiar el enlace."); } }}>{copied === group.id ? <Check /> : <LinkIcon />}</Button><Button disabled={!user || join.isPending} variant={joined ? "secondary" : "default"} onClick={() => join.mutate({ id: group.id, joined })}>{joined ? "Salir del grupo" : "Unirme"}</Button></div></li>; })}</ul>
+ {!groups.isPending && !items.length && <p className="py-10 text-center text-muted-foreground">{invite ? "No se encontró esta comunidad." : "Aún no hay comunidades en esta categoría."}</p>}
+ <p className="mt-5 text-xs text-muted-foreground">Cualquier tema legítimo, sin publicidad ni promociones comerciales.</p>
+ <Dialog open={open} onOpenChange={setOpen}><DialogContent className="w-[calc(100%-1.5rem)] rounded-lg"><DialogTitle>Crear grupo</DialogTitle><DialogDescription>Comunidad pública · sin aprobación previa</DialogDescription><form className="space-y-3" onSubmit={(e) => { e.preventDefault(); make.mutate(); }}><input required maxLength={100} placeholder="Nombre del grupo" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="w-full rounded-lg border bg-input p-3" /><textarea maxLength={500} placeholder="Descripción" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="w-full rounded-lg border bg-input p-3" /><select aria-label="Categoría" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="w-full rounded-lg border bg-input p-3">{categories.filter((c) => c !== "Todos").map((c) => <option key={c}>{c}</option>)}</select>{message && <p role="alert" className="text-sm text-destructive">{message}</p>}<Button disabled={make.isPending} className="w-full">{make.isPending ? "Creando…" : "Crear grupo"}</Button></form></DialogContent></Dialog>
+ </AppShell>;
 }

@@ -1,0 +1,3 @@
+CREATE POLICY luna_video_read ON storage.objects FOR SELECT TO authenticated USING (bucket_id = 'luna-videos');
+CREATE POLICY luna_video_upload ON storage.objects FOR INSERT TO authenticated WITH CHECK (bucket_id = 'luna-videos' AND (storage.foldername(name))[1] = auth.uid()::text);
+CREATE POLICY luna_video_delete ON storage.objects FOR DELETE TO authenticated USING (bucket_id = 'luna-videos' AND (storage.foldername(name))[1] = auth.uid()::text);

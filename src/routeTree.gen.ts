@@ -16,6 +16,7 @@ import { Route as GruposRouteImport } from './routes/grupos'
 import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as MusicaRouteImport } from './routes/musica'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SinPublicidadRouteImport } from './routes/sin-publicidad'
 
 const IndexRoute = IndexRouteImport.update({
@@ -53,6 +54,11 @@ const ProfileRoute = ProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SinPublicidadRoute = SinPublicidadRouteImport.update({
   id: '/sin-publicidad',
   path: '/sin-publicidad',
@@ -67,6 +73,7 @@ export interface FileRoutesByFullPath {
   '/messages': typeof MessagesRoute
   '/musica': typeof MusicaRoute
   '/profile': typeof ProfileRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/sin-publicidad': typeof SinPublicidadRoute
 }
 export interface FileRoutesByTo {
@@ -77,6 +84,7 @@ export interface FileRoutesByTo {
   '/messages': typeof MessagesRoute
   '/musica': typeof MusicaRoute
   '/profile': typeof ProfileRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/sin-publicidad': typeof SinPublicidadRoute
 }
 export interface FileRoutesById {
@@ -88,6 +96,7 @@ export interface FileRoutesById {
   '/messages': typeof MessagesRoute
   '/musica': typeof MusicaRoute
   '/profile': typeof ProfileRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/sin-publicidad': typeof SinPublicidadRoute
 }
 export interface FileRouteTypes {
@@ -100,6 +109,7 @@ export interface FileRouteTypes {
     | '/messages'
     | '/musica'
     | '/profile'
+    | '/reset-password'
     | '/sin-publicidad'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -110,6 +120,7 @@ export interface FileRouteTypes {
     | '/messages'
     | '/musica'
     | '/profile'
+    | '/reset-password'
     | '/sin-publicidad'
   id:
     | '__root__'
@@ -120,6 +131,7 @@ export interface FileRouteTypes {
     | '/messages'
     | '/musica'
     | '/profile'
+    | '/reset-password'
     | '/sin-publicidad'
   fileRoutesById: FileRoutesById
 }
@@ -131,6 +143,7 @@ export interface RootRouteChildren {
   MessagesRoute: typeof MessagesRoute
   MusicaRoute: typeof MusicaRoute
   ProfileRoute: typeof ProfileRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   SinPublicidadRoute: typeof SinPublicidadRoute
 }
 
@@ -185,6 +198,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sin-publicidad': {
       id: '/sin-publicidad'
       path: '/sin-publicidad'
@@ -203,6 +223,7 @@ const rootRouteChildren: RootRouteChildren = {
   MessagesRoute: MessagesRoute,
   MusicaRoute: MusicaRoute,
   ProfileRoute: ProfileRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   SinPublicidadRoute: SinPublicidadRoute,
 }
 export const routeTree = rootRouteImport

@@ -76,7 +76,7 @@ function Feed() {
               <button onClick={() => setImage(undefined)} className="glass absolute right-2 top-2 rounded-full p-1.5" aria-label="Quitar imagen"><X size={16} /></button>
             </div>
           )}
-          <button onClick={publish} className="bg-luna w-full rounded-full py-2 text-sm font-semibold text-primary-foreground transition hover:opacity-90 active:scale-95">Publicar</button>
+          <button onClick={publish} disabled={!me} className="bg-luna w-full rounded-full py-2 text-sm font-semibold text-primary-foreground transition hover:opacity-90 active:scale-95">Publicar</button>
         </div>
       )}
       <Stories />
@@ -94,7 +94,7 @@ function Feed() {
 }
 
 function PostCard({ post: p }: { post: Post }) {
-  const { getUser, react, addComment } = useStore();
+  const { me, getUser, react, addComment } = useStore();
   const [open, setOpen] = useState(false);
   const [comment, setComment] = useState("");
   const [shared, setShared] = useState(false);
@@ -128,10 +128,11 @@ function PostCard({ post: p }: { post: Post }) {
       <div className="flex gap-2 overflow-x-auto px-3 pt-3 [scrollbar-width:none]" role="group" aria-label="Reacciones">
           {REACTIONS.map((e) => {
             const n = reactionCount(p, e);
-            const mine = p.reactions.some((r) => r.emoji === e && r.userId === "me");
+            const mine = p.reactions.some((r) => r.emoji === e && r.userId === me?.id);
             return (
               <button
                 key={e}
+                disabled={!me}
                 onClick={() => react(p.id, e)}
                 aria-pressed={mine}
                 aria-label={`Reaccionar con ${e}`}
@@ -172,7 +173,7 @@ function PostCard({ post: p }: { post: Post }) {
             className="flex gap-2"
           >
             <input value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Escribe un comentario…" className="flex-1 rounded-full border bg-input px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-ring" />
-            <button className="bg-luna rounded-full px-4 text-sm font-semibold text-primary-foreground disabled:opacity-40" disabled={!comment.trim()}>Enviar</button>
+            <button className="bg-luna rounded-full px-4 text-sm font-semibold text-primary-foreground disabled:opacity-40" disabled={!comment.trim() || !me}>Enviar</button>
           </form>
         </div>
       )}

@@ -1,8 +1,11 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { Home, MessageCircle, User as UserIcon, LogOut, Search, Headphones, Users, Bell } from "lucide-react";
 import { useStore, type User } from "@/lib/store";
 import { Button } from "@/components/ui/button";
+import { useAccount } from "@/lib/account";
+import { useMusic } from "@/components/MusicPlayer";
+import { Play, Pause, Clapperboard } from "lucide-react";
 import { NotificationsPanel, SearchPanel } from "@/components/NavigationPanels";
 
 export function Avatar({ user, size = 40 }: { user?: User | undefined; size?: number }) {
@@ -29,16 +32,12 @@ const nav = [
 ] as const;
 
 export function AppShell({ title, children }: { title: string; children: ReactNode }) {
-  const { me, logout } = useStore();
+  const { me } = useStore();
   const navigate = useNavigate();
   const [searchOpen, setSearchOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
-  useEffect(() => {
-    const t = setTimeout(() => {
-      if (!me) navigate({ to: "/" });
-    }, 50);
-    return () => clearTimeout(t);
-  }, [me, navigate]);
+  const account = useAccount();
+  const music = useMusic();
 
   return (
     <div className="min-h-screen bg-background">
@@ -47,17 +46,20 @@ export function AppShell({ title, children }: { title: string; children: ReactNo
           <Link to="/feed" className="font-display text-3xl font-light tracking-[0.12em] text-foreground">LUNA</Link>
           <div className="flex items-center gap-1">
             <Button variant="ghost" size="icon" title="Buscar" aria-label="Buscar" onClick={() => setSearchOpen(true)} className="rounded-full text-foreground/80"><Search /></Button>
-            <Button asChild variant="ghost" size="icon" className="rounded-full text-primary"><Link to="/musica" title="Música" aria-label="Música"><Headphones /></Link></Button>
+            <Button variant="ghost" size="icon" className="rounded-full text-primary" title="Música" aria-label="Música" onClick={() => music.setOpen(true)}><Headphones /></Button>
             <Button asChild variant="ghost" size="icon" className="rounded-full text-primary"><Link to="/grupos" title="Grupos públicos" aria-label="Grupos públicos"><Users /></Link></Button>
             <Button variant="ghost" size="icon" title="Notificaciones" aria-label="Notificaciones" onClick={() => setNotificationsOpen(true)} className="rounded-full text-foreground/80"><Bell /></Button>
-            <Button variant="ghost" size="icon" title="Salir" onClick={() => { logout(); navigate({ to: "/" }); }} aria-label="Salir" className="rounded-full text-muted-foreground hover:text-destructive"><LogOut /></Button>
+            <Button variant="ghost" size="icon" title="Salir" onClick={async () => { music.stop(); await account.signOut(); navigate({ to: "/", replace: true }); }} aria-label="Salir" className="rounded-full text-muted-foreground hover:text-destructive"><LogOut /></Button>
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-2xl px-3 pb-24 pt-16">
+      <main className="mx-auto max-w-2xl px-3 pb-40 pt-16">
         <h1 className="sr-only">{title}</h1>
-        {children}
+        <div className="mb-3 flex gap-3 border-b pb-2 text-xs"><Link to="/feed" className="text-primary">Inicio</Link><Link to="/videos" className="flex items-center gap-1 text-primary"><Clapperboard size={14} /> Videos y reels</Link><Link to="/musica" className="text-primary">Música</Link></div>
+        {account.loading ? <p role="status" className="py-8 text-center text-muted-foreground">Cargando cuenta…</p> : children}
+        {!account.loading && !me && <p className="mt-4 text-sm text-muted-foreground">{account.error || "Inicia sesión para publicar y unirte a comunidades."} <Link to="/" className="text-primary">Entrar</Link></p>}
       </main>
+      {music.started && <div className="fixed inset-x-0 bottom-14 z-30 border-t bg-card"><div className="mx-auto flex h-14 max-w-2xl items-center gap-3 px-4"><Button size="icon" variant="ghost" aria-label={music.playing ? "Pausar música de fondo" : "Reanudar música de fondo"} onClick={() => music.playTrack(music.selected)}>{music.playing ? <Pause /> : <Play />}</Button><Button variant="ghost" className="min-w-0 flex-1 justify-start" onClick={() => music.setOpen(true)}><span className="truncate">Música de fondo · {Math.floor(music.time)} s</span></Button></div></div>}
       <nav className="fixed inset-x-0 bottom-0 z-30 border-t bg-card">
         <div className="mx-auto flex h-14 max-w-2xl items-center justify-around">
           {nav.map(({ to, label, icon: Icon }) => (
