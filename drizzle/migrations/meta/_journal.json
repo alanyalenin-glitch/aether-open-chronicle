@@ -15,6 +15,13 @@
       "when": 1794098011837,
       "tag": "0001_registration_and_group_transactions",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794098061642,
+      "tag": "0002_video_storage_access",
+      "breakpoints": true
     }
   ]
 }
