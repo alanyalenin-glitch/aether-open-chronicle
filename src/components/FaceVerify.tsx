@@ -33,7 +33,7 @@ export function FaceVerify({ verified, onVerified }: { verified: boolean; onVeri
         )}
       </div>
       <p className="mt-3 text-sm font-medium">
-        {phase === "done" ? "Identidad verificada" : phase === "scanning" ? `Analizando rostro… ${progress}%` : "Verificación facial"}
+        {phase === "done" ? "Simulación completada" : phase === "scanning" ? `Analizando rostro… ${progress}%` : "Verificación facial simulada"}
       </p>
       {phase === "idle" && (
         <button

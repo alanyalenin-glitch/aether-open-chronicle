@@ -1,5 +1,6 @@
 import mountain from "@/assets/post-mountain.jpg";
-import { publicName } from "@/lib/identity";
+import { useAccount } from "@/lib/account";
+import { supabase } from "@/integrations/supabase/client";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
 export type PrivateInfo = { fullName: string; email: string; birthDate: string; zodiac: string; faceVerified: boolean; verifiedAt?: number | undefined };
@@ -88,8 +89,6 @@ type State = { me: User | null; posts: Post[]; convos: Conversation[] };
 type Ctx = State & {
   people: User[];
   getUser: (id: string) => User | undefined;
-  login: (name: string) => void;
-  register: (info: PrivateInfo) => void;
   logout: () => void;
   updateMe: (p: Partial<User>) => void;
   addPost: (text: string, image?: string) => void;
@@ -103,6 +102,7 @@ const KEY = "luna-state-v2";
 const LEGACY_KEY = "aether-state-v2";
 
 export function StoreProvider({ children }: { children: ReactNode }) {
+  const account = useAccount();
   const [state, setState] = useState<State>({ me: null, posts: seedPosts, convos: seedConvos });
   const [loaded, setLoaded] = useState(false);
 
@@ -112,36 +112,36 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (raw) {
         const saved = JSON.parse(raw) as Partial<State> & { posts?: (Partial<Post> & { likes?: string[] })[] };
         setState({
-          me: saved.me ?? null,
+          me: null,
           convos: Array.isArray(saved.convos) ? saved.convos : seedConvos,
           posts: Array.isArray(saved.posts) ? saved.posts.map(normalizePost) : seedPosts,
         });
+        localStorage.removeItem(LEGACY_KEY);
+        localStorage.setItem(KEY, JSON.stringify({ posts: saved.posts ?? [], convos: saved.convos ?? [] }));
       }
     } catch {}
     setLoaded(true);
   }, []);
   useEffect(() => {
-    if (loaded) try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {}
+    if (loaded) try { localStorage.setItem(KEY, JSON.stringify({ posts: state.posts, convos: state.convos })); } catch {}
   }, [state, loaded]);
 
-  const getUser = (id: string) => (state.me?.id === id ? state.me : people.find((p) => p.id === id));
+  const me = account.user;
+  const [publicPeople, setPublicPeople] = useState<User[]>(people);
+  useEffect(() => { void supabase.from("profiles").select("id,name,handle,bio,hue").limit(500).then(({ data }) => { if (data) setPublicPeople([...people, ...data]); }); }, [me?.id]);
+  const getUser = (id: string) => (me?.id === id || id === "me" ? me ?? undefined : publicPeople.find((p) => p.id === id));
 
   const value: Ctx = {
     ...state,
-    people,
+    me,
+    people: publicPeople,
     getUser,
-    login: (name) =>
-      setState((s) => ({
-        ...s,
-        me: { id: "me", name, handle: name.toLowerCase().replace(/[^a-z0-9]/g, "") || "yo", bio: "Nuevo en Luna.", hue: 200 },
-      })),
-    register: (info) =>
-      setState((s) => {
-        const name = publicName(info.fullName);
-        return { ...s, me: { id: "me", name, handle: name.toLowerCase().normalize("NFD").replace(/[^a-z0-9]/g, "") || "yo", bio: "Nuevo en Luna.", hue: 200, private: info } };
-      }),
-    logout: () => setState((s) => ({ ...s, me: null })),
-    updateMe: (p) => setState((s) => (s.me ? { ...s, me: { ...s.me, ...p } } : s)),
+    logout: () => { void account.signOut(); },
+    updateMe: (p) => {
+      if (!me) return;
+      const values = { ...(p.bio !== undefined ? { bio: p.bio } : {}), ...(p.hue !== undefined ? { hue: p.hue } : {}) };
+      void supabase.from("profiles").update(values).eq("id", me.id).then(({ error }) => { if (!error) void account.refresh(); });
+    },
     addPost: (text, image) =>
       setState((s) => ({
         ...s,
@@ -150,7 +150,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     react: (id, emoji) =>
       setState((s) => ({
         ...s,
-        posts: s.posts.map((p) => (p.id === id ? reactTo(p, "me", emoji) : p)),
+        posts: s.posts.map((p) => (p.id === id ? reactTo(p, me?.id ?? "me", emoji) : p)),
       })),
     addComment: (id, text) =>
       setState((s) => ({
