@@ -8,6 +8,13 @@
       "when": 1793978054031,
       "tag": "0000_secure_profiles_groups_media",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1794098011837,
+      "tag": "0001_registration_and_group_transactions",
+      "breakpoints": true
     }
   ]
 }

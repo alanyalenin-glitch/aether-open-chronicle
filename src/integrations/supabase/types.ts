@@ -181,7 +181,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      complete_luna_registration: {
+        Args: {
+          p_birth_date: string
+          p_full_name: string
+          p_name: string
+          p_zodiac: string
+        }
+        Returns: undefined
+      }
+      create_luna_group: {
+        Args: { p_category: string; p_description: string; p_name: string }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
